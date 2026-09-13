@@ -12,8 +12,7 @@ import { useAuth } from '../auth/AuthContext';
 import { MobileBottomNav } from '../components/MobileBottomNav';
 import { useAsyncResource } from '../hooks/useAsyncResource';
 import { isSupabaseBackendEnabled } from '../lib/backendMode';
-import { getCurrentProviderOrganization } from '../services';
-import { PROVIDER_LOGO_KEY, useStoredProfileImage } from '../lib/profileMedia';
+import { getCurrentProviderLogo, getCurrentProviderOrganization } from '../services';
 
 const MORE_HREF = '/provider/more';
 const WORKERS_HREF = '/provider/workers';
@@ -78,7 +77,6 @@ function hideProviderBottomNav(pathname: string) {
 export function ProviderAppShell() {
   const { pathname } = useLocation();
   const { isAuthenticated } = useAuth();
-  const organizationLogo = useStoredProfileImage(PROVIDER_LOGO_KEY);
   const { data: providerOrg, loading: orgLoading } = useAsyncResource(
     () =>
       isAuthenticated && isSupabaseBackendEnabled()
@@ -86,7 +84,12 @@ export function ProviderAppShell() {
         : Promise.resolve({ ok: true as const, data: null }),
     [pathname, isAuthenticated],
   );
+  const { data: logoAsset } = useAsyncResource(
+    () => isAuthenticated ? getCurrentProviderLogo() : Promise.resolve({ ok: true as const, data: { url: undefined, message: '' } }),
+    [pathname, isAuthenticated],
+  );
 
+  const organizationLogo = logoAsset?.url;
   const organizationName = !orgLoading && providerOrg?.organizationName ? providerOrg.organizationName : null;
   const headerSubtitle = providerHeaderSubtitle(pathname, organizationName);
   const hideNav = hideProviderBottomNav(pathname);
