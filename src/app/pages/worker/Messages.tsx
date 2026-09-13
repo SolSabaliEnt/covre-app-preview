@@ -17,7 +17,7 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A]"
+        className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
       >
         Try again
       </button>
@@ -43,13 +43,25 @@ export default function WorkerMessages() {
           {loading && <LoadingBlock />}
           {error && <ErrorBlock message={error.message} onRetry={reload} />}
 
-          {!loading && !error && threads && (
+          {!loading && !error && threads && threads.length === 0 && (
+            <section className="border-y border-[#DDE7E8] py-12 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]">
+                <MessageSquareText className="h-5 w-5" aria-hidden />
+              </div>
+              <h2 className="mt-4 text-base font-semibold text-[#13334F]">No messages yet.</h2>
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#607583]">
+                Shift updates and support conversations will appear here when there’s something you need to see.
+              </p>
+            </section>
+          )}
+
+          {!loading && !error && threads && threads.length > 0 && (
             <div className="border-t border-[#BFCED4]">
               {threads.map(t => (
                 <button
                   key={t.id}
                   type="button"
-                  className="flex w-full items-start gap-4 border-b border-[#DDE7E8] py-4 text-left transition-colors hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+                  className="flex min-h-16 w-full items-start gap-4 border-b border-[#DDE7E8] py-4 text-left transition-colors hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
                 >
                   <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]">
                     <MessageSquareText className="h-4.5 w-4.5" aria-hidden />
