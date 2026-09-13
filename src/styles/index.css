@@ -2,44 +2,49 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/* Landing hero video tuning: keep the subject visible while preserving text contrast. */
-video[src="/covre-header-background.mp4"] {
+/* Landing hero video tuning. The video uses a nested <source>, so target the
+   hero section's direct autoplay video rather than video[src=...]. */
+section > video[autoplay] {
   display: block !important;
-  filter: saturate(0.92) contrast(1.04);
+  visibility: visible !important;
+  opacity: 1 !important;
+  filter: saturate(0.94) contrast(1.03);
   transform: scale(1.04);
   transform-origin: center center;
 }
 
-video[src="/covre-header-background.mp4"] + div {
-  background-color: rgba(11, 36, 58, 0.24) !important;
+section > video[autoplay] + div {
+  background-color: rgba(11, 36, 58, 0.18) !important;
 }
 
-video[src="/covre-header-background.mp4"] + div + div {
+section > video[autoplay] + div + div {
   background-image: linear-gradient(
     90deg,
-    rgba(11, 36, 58, 0.84) 0%,
-    rgba(11, 36, 58, 0.70) 34%,
-    rgba(11, 36, 58, 0.36) 62%,
-    rgba(11, 36, 58, 0.10) 100%
+    rgba(11, 36, 58, 0.82) 0%,
+    rgba(11, 36, 58, 0.67) 34%,
+    rgba(11, 36, 58, 0.30) 62%,
+    rgba(11, 36, 58, 0.06) 100%
   ) !important;
 }
 
 @media (min-width: 1024px) {
-  video[src="/covre-header-background.mp4"] {
+  section > video[autoplay] {
     object-position: center center !important;
-    transform: translateX(12%) scale(1.30);
+    transform: translateX(10%) scale(1.22);
   }
 }
 
 @media (max-width: 1023px) {
-  video[src="/covre-header-background.mp4"] {
+  section > video[autoplay] {
     object-position: center center !important;
     transform: scale(1.04);
   }
 }
 
+/* Do not let Tailwind's motion-reduce:hidden remove the hero media entirely.
+   The browser may still choose not to autoplay, but the video element remains visible. */
 @media (prefers-reduced-motion: reduce) {
-  video[src="/covre-header-background.mp4"] {
+  section > video[autoplay] {
     display: block !important;
   }
 }
