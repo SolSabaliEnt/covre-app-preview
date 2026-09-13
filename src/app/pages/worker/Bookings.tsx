@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router';
-import { CalendarPlus, Heart, Repeat2 } from 'lucide-react';
+import { ArrowRight, CalendarClock, CalendarPlus, CheckCircle2, Heart, Repeat2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   addShiftToCalendar,
@@ -11,7 +11,6 @@ import {
 } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { useWorkerAction } from '../../hooks/useWorkerAction';
-import { StatusBadge } from '../../components/StatusBadge';
 import { WorkerShiftInvitations } from '../../components/WorkerShiftInvitations';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
 import {
@@ -35,134 +34,36 @@ const EMPTY_CONTINUITY: WorkerContinuitySummary = {
 
 function LoadingBlock() {
   return (
-    <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
+    <div className="border-y border-[#DDE7E8] py-12 text-center">
+      <p className="text-sm font-medium text-[#607583]">Loading your shifts…</p>
     </div>
   );
 }
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm text-[#607583]">{message}</p>
+    <div className="border-y border-[#DDE7E8] py-10 text-center">
+      <p className="text-sm text-[#607583]">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+        className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A]"
       >
-        Retry
+        Try again
       </button>
     </div>
   );
 }
 
-function BookingCard({
-  shift,
-  statusDisplay,
-  isUpcoming,
-  calendarAdded,
-  onAddToCalendar,
-  calendarPending,
-  showActiveShift,
-  supabaseMode,
-  workedHereCount,
-  returnPreferenceSaved,
-  returnPreferencePending,
-  onSaveReturnPreference,
-}: {
-  shift: Shift;
-  statusDisplay: string;
-  isUpcoming: boolean;
-  calendarAdded: boolean;
-  onAddToCalendar: () => void;
-  calendarPending: boolean;
-  showActiveShift: boolean;
-  supabaseMode: boolean;
-  workedHereCount?: number;
-  returnPreferenceSaved?: boolean;
-  returnPreferencePending?: boolean;
-  onSaveReturnPreference?: () => void;
-}) {
-  const payLabel = acceptedPayRateLabel(
-    supabaseMode,
-    shift.rateTypeSnapshot ?? shift.rateType,
-  );
-  const payDisplay = displayAcceptedWorkerPay(shift);
+function PayBlock({ shift, supabaseMode }: { shift: Shift; supabaseMode: boolean }) {
+  const payLabel = acceptedPayRateLabel(supabaseMode, shift.rateTypeSnapshot ?? shift.rateType);
   const showShiftTotal = hasWorkerRateSnapshot(shift) && shift.estimatedTotalDisplay !== '—';
 
   return (
-    <div className="rounded-xl border border-[#DDE7E8] bg-white p-4 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="font-semibold text-[#13334F]">{shift.roleTitle}</div>
-          <div className="text-sm text-[#607583]">{shift.siteName}</div>
-          <div className="mt-1 text-sm text-[#607583]">
-            {shift.dateLabel} · {shift.timeRange}
-          </div>
-          <div className="mt-2 text-sm">
-            <div className="text-xs font-semibold uppercase tracking-wide text-[#607583]">{payLabel}</div>
-            <div className="font-medium text-[#53B59F]">{payDisplay}</div>
-            {showShiftTotal ? (
-              <span className="mt-1 block font-normal text-[#607583]">Shift total {shift.estimatedTotalDisplay}</span>
-            ) : null}
-          </div>
-        </div>
-        <StatusBadge variant="covered">{statusDisplay}</StatusBadge>
-      </div>
-
-      {workedHereCount && workedHereCount > 1 ? (
-        <div className="mt-4 flex items-start gap-2 rounded-lg border border-[#BFDCD5] bg-[#E6F6F2] px-3 py-2.5 text-sm text-[#257665]">
-          <Repeat2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <span>
-            {workedHereCount >= 5 ? 'One of your regular places' : 'A familiar place'} · {workedHereCount} approved shifts here
-          </span>
-        </div>
-      ) : null}
-
-      {!isUpcoming ? (
-        <div className="mt-4 rounded-xl border border-[#DDE7E8] bg-[#F7FAFA] p-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#607583]">Your preference</p>
-          <p className="mt-1 text-sm text-[#13334F]">Would you be open to working at {shift.siteName} again?</p>
-          <p className="mt-1 text-xs leading-5 text-[#607583]">
-            This stays private. Covre can use it to remember places you would return to; it is not shown as a public rating or mutual-match status.
-          </p>
-          <button
-            type="button"
-            disabled={returnPreferenceSaved || returnPreferencePending}
-            onClick={onSaveReturnPreference}
-            className="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[#BFDCD5] bg-white px-3 py-2 text-sm font-semibold text-[#257665] transition-colors hover:bg-[#E6F6F2] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <Heart className="h-4 w-4" aria-hidden />
-            {returnPreferenceSaved ? 'Saved: I’d work here again' : 'I’d work here again'}
-          </button>
-        </div>
-      ) : null}
-
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <Link
-          to={`/worker/shift/${shift.id}`}
-          className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] no-underline sm:min-w-[8rem]"
-        >
-          View shift
-        </Link>
-        <button
-          type="button"
-          disabled={calendarAdded || calendarPending}
-          onClick={onAddToCalendar}
-          className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-[#DDE7E8] bg-white px-4 py-3 text-sm font-semibold text-[#13334F] transition-colors hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[8rem]"
-        >
-          <CalendarPlus className="h-4 w-4 shrink-0" aria-hidden />
-          {calendarAdded ? 'Added' : 'Add to Calendar'}
-        </button>
-        {isUpcoming && showActiveShift && (
-          <Link
-            to="/worker/active-shift"
-            className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#53B59F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#2F8E7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13334F] no-underline sm:min-w-[8rem]"
-          >
-            Active Shift
-          </Link>
-        )}
-      </div>
+    <div className="text-right">
+      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#7A8D98]">{payLabel}</p>
+      <p className="mt-1 text-lg font-semibold text-[#13334F]">{displayAcceptedWorkerPay(shift)}</p>
+      {showShiftTotal ? <p className="mt-1 text-xs text-[#607583]">{shift.estimatedTotalDisplay} shift total</p> : null}
     </div>
   );
 }
@@ -178,132 +79,225 @@ export default function WorkerBookings() {
 
   useEffect(() => {
     if (!savedReturnPreferenceSites) return;
-    setReturnPreferenceBySite(
-      Object.fromEntries(savedReturnPreferenceSites.map(siteId => [siteId, true])),
-    );
+    setReturnPreferenceBySite(Object.fromEntries(savedReturnPreferenceSites.map(siteId => [siteId, true])));
   }, [savedReturnPreferenceSites]);
 
   const isEmpty = data && data.upcoming.length === 0 && data.completed.length === 0;
   const continuity = continuityData ?? EMPTY_CONTINUITY;
   const recognition = useMemo(() => buildWorkerContinuityRecognition(continuity), [continuity]);
+  const nextBooking = data?.upcoming[0];
+  const laterBookings = data?.upcoming.slice(1) ?? [];
+
+  const addCalendar = async (shiftId: string) => {
+    const result = await run(`cal-${shiftId}`, () => addShiftToCalendar(shiftId));
+    if (result.ok) {
+      toast.success(result.data.message);
+      setCalendarAddedByShift(prev => ({ ...prev, [shiftId]: true }));
+    } else {
+      toast.error(result.error.message);
+    }
+  };
+
+  const saveReturnPreference = async (siteId: string) => {
+    const result = await run(`return-${siteId}`, () => saveWorkerSiteReturnPreference(siteId));
+    if (result.ok) {
+      toast.success(result.data.message);
+      setReturnPreferenceBySite(prev => ({ ...prev, [siteId]: true }));
+    } else {
+      toast.error(result.error.message);
+    }
+  };
 
   return (
-    <div className="min-h-[100svh] w-full max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 py-6 text-[#10283D]">
-      <header className="border-b border-[#DDE7E8] bg-white p-5 sm:p-6">
-        <h1 className="text-2xl font-semibold text-[#13334F]">Bookings</h1>
-        <p className="mt-2 text-sm text-[#607583]">
-          {supabaseMode
-            ? 'Invitations, confirmed bookings, and accepted pay stay here; continuity recognition is based on approved work only.'
-            : 'Track invitations, confirmed shifts, upcoming work, and completed coverage.'}
-        </p>
-      </header>
+    <div className="min-h-[100svh] w-full max-w-full overflow-x-hidden bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-5 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Your work</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Bookings</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">
+            Confirmed work first. Invitations, shift details, accepted pay, and your approved history stay connected here.
+          </p>
+        </header>
 
-      <div className="space-y-8 py-4">
-        <WorkerShiftInvitations />
+        <section className="border-b border-[#DDE7E8] py-5">
+          <WorkerShiftInvitations />
+        </section>
 
         {loading && <LoadingBlock />}
         {error && <ErrorBlock message={error.message} onRetry={reload} />}
 
         {!loading && !error && recognition && (
-          <section className="rounded-2xl border border-[#BFDCD5] bg-[#E6F6F2] p-5 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#257665]">{recognition.eyebrow}</p>
-            <h2 className="mt-1 text-xl font-semibold text-[#13334F]">{recognition.headline}</h2>
-            <p className="mt-2 text-sm leading-6 text-[#607583]">{recognition.detail}</p>
-            <div className="mt-5 grid grid-cols-2 gap-4 border-t border-[#BFDCD5] pt-4">
-              <div>
+          <section className="border-b border-[#DDE7E8] py-5">
+            <div className="flex items-start gap-3">
+              <Repeat2 className="mt-0.5 h-5 w-5 shrink-0 text-[#2F8E7A]" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">{recognition.eyebrow}</p>
+                <h2 className="mt-1 text-lg font-semibold text-[#13334F]">{recognition.headline}</h2>
+                <p className="mt-1 text-sm leading-6 text-[#607583]">{recognition.detail}</p>
+              </div>
+              <div className="shrink-0 text-right">
                 <p className="text-2xl font-semibold text-[#13334F]">{recognition.primaryValue}</p>
                 <p className="text-xs text-[#607583]">{recognition.primaryLabel}</p>
               </div>
-              {typeof recognition.secondaryValue === 'number' ? (
-                <div>
-                  <p className="text-2xl font-semibold text-[#13334F]">{recognition.secondaryValue}</p>
-                  <p className="text-xs text-[#607583]">{recognition.secondaryLabel}</p>
-                </div>
-              ) : null}
             </div>
           </section>
         )}
 
         {!loading && !error && isEmpty && (
-          <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center shadow-sm">
-            <p className="text-sm text-[#607583]">No bookings yet. Apply for open shifts or respond to an invitation to get started.</p>
-            <Link to="/worker/shifts" className="mt-4 inline-flex text-sm font-semibold text-[#53B59F] hover:underline">
-              Browse open shifts →
+          <section className="border-b border-[#DDE7E8] py-12 text-center">
+            <CalendarClock className="mx-auto h-8 w-8 text-[#53B59F]" aria-hidden />
+            <p className="mt-3 text-base font-semibold text-[#13334F]">Nothing booked yet.</p>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#607583]">
+              Request an open shift or respond to an invitation and your confirmed work will land here.
+            </p>
+            <Link to="/worker/shifts" className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">
+              Browse open shifts <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
-          </div>
+          </section>
         )}
 
-        {!loading && !error && data && !isEmpty && (
-          <>
-            <section>
-              <h2 className="mb-3 px-1 text-sm font-semibold uppercase tracking-wide text-[#607583]">Upcoming</h2>
-              {data.upcoming.length === 0 ? (
-                <p className="px-1 text-sm text-[#607583]">No upcoming bookings yet.</p>
-              ) : (
-                <div className="space-y-3">
-                  {data.upcoming.map(({ shift, statusDisplay }) => (
-                    <BookingCard
-                      key={`${shift.id}-upcoming`}
-                      shift={shift}
-                      statusDisplay={statusDisplay}
-                      isUpcoming
-                      supabaseMode={supabaseMode}
-                      showActiveShift={!supabaseMode}
-                      workedHereCount={getSiteContinuity(continuity, shift.siteId)?.completedShifts}
-                      calendarAdded={!!calendarAddedByShift[shift.id]}
-                      calendarPending={isPending(`cal-${shift.id}`)}
-                      onAddToCalendar={async () => {
-                        const r = await run(`cal-${shift.id}`, () => addShiftToCalendar(shift.id));
-                        if (r.ok) {
-                          toast.success(r.data.message);
-                          setCalendarAddedByShift(prev => ({ ...prev, [shift.id]: true }));
-                        } else toast.error(r.error.message);
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </section>
+        {!loading && !error && data && !isEmpty && nextBooking && (
+          <section className="border-b border-[#BFCED4] py-7">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">
+              <CalendarClock className="h-4 w-4" aria-hidden /> Next up
+            </div>
 
-            <section>
-              <h2 className="mb-3 px-1 text-sm font-semibold uppercase tracking-wide text-[#607583]">Completed</h2>
-              {data.completed.length === 0 ? (
-                <p className="px-1 text-sm text-[#607583]">No completed shifts listed.</p>
-              ) : (
-                <div className="space-y-3">
-                  {data.completed.map(({ shift, statusDisplay }) => (
-                    <BookingCard
-                      key={`${shift.id}-completed`}
-                      shift={shift}
-                      statusDisplay={statusDisplay}
-                      isUpcoming={false}
-                      supabaseMode={supabaseMode}
-                      showActiveShift={false}
-                      workedHereCount={getSiteContinuity(continuity, shift.siteId)?.completedShifts}
-                      returnPreferenceSaved={Boolean(returnPreferenceBySite[shift.siteId])}
-                      returnPreferencePending={isPending(`return-${shift.siteId}`)}
-                      onSaveReturnPreference={async () => {
-                        const r = await run(`return-${shift.siteId}`, () => saveWorkerSiteReturnPreference(shift.siteId));
-                        if (r.ok) {
-                          toast.success(r.data.message);
-                          setReturnPreferenceBySite(prev => ({ ...prev, [shift.siteId]: true }));
-                        } else toast.error(r.error.message);
-                      }}
-                      calendarAdded={!!calendarAddedByShift[shift.id]}
-                      calendarPending={isPending(`cal-${shift.id}`)}
-                      onAddToCalendar={async () => {
-                        const r = await run(`cal-${shift.id}`, () => addShiftToCalendar(shift.id));
-                        if (r.ok) {
-                          toast.success(r.data.message);
-                          setCalendarAddedByShift(prev => ({ ...prev, [shift.id]: true }));
-                        } else toast.error(r.error.message);
-                      }}
-                    />
-                  ))}
-                </div>
+            <div className="mt-4 flex items-start justify-between gap-5">
+              <div className="min-w-0">
+                <h2 className="text-2xl font-semibold tracking-[-0.025em] text-[#13334F]">{nextBooking.shift.roleTitle}</h2>
+                <p className="mt-1 text-base text-[#466170]">{nextBooking.shift.siteName}</p>
+                <p className="mt-2 text-sm font-medium text-[#13334F]">{nextBooking.shift.dateLabel} · {nextBooking.shift.timeRange}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-[#2F8E7A]">{nextBooking.statusDisplay}</p>
+              </div>
+              <PayBlock shift={nextBooking.shift} supabaseMode={supabaseMode} />
+            </div>
+
+            {getSiteContinuity(continuity, nextBooking.shift.siteId)?.completedShifts ? (
+              <div className="mt-4 flex items-start gap-2 bg-[#E6F6F2] px-4 py-3 text-sm text-[#466170]">
+                <Repeat2 className="mt-0.5 h-4 w-4 shrink-0 text-[#257665]" aria-hidden />
+                <span>
+                  This site already knows your work · {getSiteContinuity(continuity, nextBooking.shift.siteId)?.completedShifts} approved shifts here
+                </span>
+              </div>
+            ) : null}
+
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+              <Link
+                to={`/worker/shift/${nextBooking.shift.id}`}
+                className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#0B243A]"
+              >
+                Know before you go <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+              {!supabaseMode && (
+                <Link
+                  to="/worker/active-shift"
+                  className="inline-flex min-h-12 flex-1 items-center justify-center rounded-xl bg-[#53B59F] px-5 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#2F8E7A]"
+                >
+                  Open active shift
+                </Link>
               )}
-            </section>
-          </>
+              <button
+                type="button"
+                disabled={!!calendarAddedByShift[nextBooking.shift.id] || isPending(`cal-${nextBooking.shift.id}`)}
+                onClick={() => addCalendar(nextBooking.shift.id)}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#DDE7E8] px-5 text-sm font-semibold text-[#13334F] transition-colors hover:bg-[#F7FAFA] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <CalendarPlus className="h-4 w-4" aria-hidden />
+                {calendarAddedByShift[nextBooking.shift.id] ? 'Added' : 'Calendar'}
+              </button>
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && laterBookings.length > 0 && (
+          <section className="pt-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Later bookings</p>
+            <div className="mt-3 border-t border-[#BFCED4]">
+              {laterBookings.map(({ shift, statusDisplay }) => (
+                <article key={`${shift.id}-upcoming`} className="border-b border-[#DDE7E8] py-5">
+                  <div className="flex items-start justify-between gap-5">
+                    <div className="min-w-0">
+                      <h3 className="text-lg font-semibold text-[#13334F]">{shift.roleTitle}</h3>
+                      <p className="mt-1 text-sm text-[#466170]">{shift.siteName}</p>
+                      <p className="mt-2 text-sm text-[#607583]">{shift.dateLabel} · {shift.timeRange}</p>
+                      <p className="mt-1 text-xs font-semibold text-[#2F8E7A]">{statusDisplay}</p>
+                    </div>
+                    <PayBlock shift={shift} supabaseMode={supabaseMode} />
+                  </div>
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <button
+                      type="button"
+                      disabled={!!calendarAddedByShift[shift.id] || isPending(`cal-${shift.id}`)}
+                      onClick={() => addCalendar(shift.id)}
+                      className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#607583] hover:text-[#13334F] disabled:opacity-60"
+                    >
+                      <CalendarPlus className="h-4 w-4" aria-hidden /> {calendarAddedByShift[shift.id] ? 'Added' : 'Add to calendar'}
+                    </button>
+                    <Link to={`/worker/shift/${shift.id}`} className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#2F8E7A] no-underline hover:text-[#257665]">
+                      View shift <ArrowRight className="h-4 w-4" aria-hidden />
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {!loading && !error && data && data.completed.length > 0 && (
+          <section className="pt-9">
+            <div className="flex items-end justify-between gap-4 pb-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Work history</p>
+                <h2 className="mt-1 text-xl font-semibold text-[#13334F]">Completed shifts</h2>
+              </div>
+              <CheckCircle2 className="h-5 w-5 text-[#53B59F]" aria-hidden />
+            </div>
+
+            <div className="border-t border-[#BFCED4]">
+              {data.completed.map(({ shift, statusDisplay }) => {
+                const workedHereCount = getSiteContinuity(continuity, shift.siteId)?.completedShifts;
+                const preferenceSaved = Boolean(returnPreferenceBySite[shift.siteId]);
+                return (
+                  <article key={`${shift.id}-completed`} className="border-b border-[#DDE7E8] py-5">
+                    <div className="flex items-start justify-between gap-5">
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-semibold text-[#13334F]">{shift.roleTitle}</h3>
+                        <p className="mt-1 text-sm text-[#466170]">{shift.siteName}</p>
+                        <p className="mt-2 text-sm text-[#607583]">{shift.dateLabel} · {shift.timeRange}</p>
+                        <p className="mt-1 text-xs font-semibold text-[#2F8E7A]">{statusDisplay}</p>
+                      </div>
+                      <PayBlock shift={shift} supabaseMode={supabaseMode} />
+                    </div>
+
+                    {workedHereCount && workedHereCount > 1 ? (
+                      <p className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-[#257665]">
+                        <Repeat2 className="h-3.5 w-3.5" aria-hidden />
+                        {workedHereCount >= 5 ? 'One of your regular places' : 'Familiar place'} · {workedHereCount} approved shifts
+                      </p>
+                    ) : null}
+
+                    <div className="mt-4 flex flex-col gap-3 border-t border-[#EEF3F4] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        disabled={preferenceSaved || isPending(`return-${shift.siteId}`)}
+                        onClick={() => saveReturnPreference(shift.siteId)}
+                        className="inline-flex min-h-10 items-center gap-2 self-start text-sm font-semibold text-[#257665] disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        <Heart className="h-4 w-4" aria-hidden />
+                        {preferenceSaved ? 'Saved: I’d work here again' : 'I’d work here again'}
+                      </button>
+                      <Link to={`/worker/shift/${shift.id}`} className="inline-flex min-h-10 items-center gap-1.5 self-start text-sm font-semibold text-[#2F8E7A] no-underline hover:text-[#257665]">
+                        View record <ArrowRight className="h-4 w-4" aria-hidden />
+                      </Link>
+                    </div>
+                    {!preferenceSaved ? (
+                      <p className="mt-2 text-xs leading-5 text-[#9AAAB3]">Private to you. Covre uses this only to remember places you would return to.</p>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </section>
         )}
       </div>
     </div>
