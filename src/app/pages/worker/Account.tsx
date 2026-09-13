@@ -14,10 +14,9 @@ import {
 import { toast } from 'sonner';
 import { useAuth } from '../../auth/AuthContext';
 import { WORKER_ENTRY_PATH } from '../../lib/entryRoutes';
-import { getWorkerAccount } from '../../services';
+import { getCurrentWorkerAvatar, getWorkerAccount } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
-import { WORKER_PROFILE_PHOTO_KEY, useStoredProfileImage } from '../../lib/profileMedia';
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -33,8 +32,9 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
 export default function WorkerAccount() {
   const navigate = useNavigate();
   const { name, logout, isAuthenticated } = useAuth();
-  const profilePhoto = useStoredProfileImage(WORKER_PROFILE_PHOTO_KEY);
   const { data: accountStub, error, loading, reload } = useAsyncResource(() => getWorkerAccount(), []);
+  const { data: avatarAsset } = useAsyncResource(() => getCurrentWorkerAvatar(), []);
+  const profilePhoto = avatarAsset?.url;
 
   const displayName = loading
     ? 'Loading…'
