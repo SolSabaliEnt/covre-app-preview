@@ -21,6 +21,7 @@ export * from './providerWorkerRelationshipService';
 export * from './providerShiftInvitationService';
 export * from './providerApplicantReviewService';
 export * from './providerApplicantReviewTypes';
+export * from './profileMediaService';
 export {
   bookWorkerForShift,
   inviteWorkerToShift,
