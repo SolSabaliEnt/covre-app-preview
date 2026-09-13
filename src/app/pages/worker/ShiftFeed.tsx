@@ -1,8 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ShiftCard } from '../../components/ShiftCard';
 import { WorkerShiftMap } from '../../components/WorkerShiftMap';
 import { Link } from 'react-router';
-import { Bookmark, Heart, Repeat2, Shield, Settings, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  Bookmark,
+  CheckCircle2,
+  Clock3,
+  Heart,
+  List,
+  Map as MapIcon,
+  MapPin,
+  Repeat2,
+  Settings,
+  Shield,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import {
   getWorkerContinuitySummary,
@@ -20,18 +31,6 @@ import { displayWorkerPay } from '../../lib/workerRateCents';
 import { WORKER_ENTRY_PATH } from '../../lib/entryRoutes';
 import { getSiteContinuity, type WorkerContinuitySummary } from '../../lib/workerContinuity';
 
-const filters = [
-  'Nearby',
-  'Highest Pay',
-  'Today',
-  'Overnight',
-  'Previously Worked',
-  'Med Pass',
-  'Memory Care',
-  'Group Home',
-  'Assisted Living',
-];
-
 const EMPTY_CONTINUITY: WorkerContinuitySummary = {
   totalCompletedShifts: 0,
   familiarSiteCount: 0,
@@ -43,22 +42,22 @@ type ViewMode = 'list' | 'map';
 
 function LoadingBlock() {
   return (
-    <div className="mx-4 rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
+    <div className="border-y border-[#DDE7E8] py-12 text-center">
+      <p className="text-sm font-medium text-[#607583]">Finding shifts that fit your profile…</p>
     </div>
   );
 }
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="mx-4 rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm text-[#607583]">{message}</p>
+    <div className="border-y border-[#DDE7E8] py-10 text-center">
+      <p className="text-sm text-[#607583]">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+        className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
       >
-        Retry
+        Try again
       </button>
     </div>
   );
@@ -66,16 +65,15 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
 
 function EmptyShiftState({ supabaseMode }: { supabaseMode?: boolean }) {
   return (
-    <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center shadow-sm">
-      <p className="text-sm text-[#607583]">
+    <div className="border-y border-[#DDE7E8] py-12 text-center">
+      <p className="text-base font-semibold text-[#13334F]">No good-fit shifts are open right now.</p>
+      <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#607583]">
         {supabaseMode
-          ? 'No eligible shifts are available right now.'
-          : 'No open shifts right now. Check back after facilities post coverage.'}
+          ? 'We’ll show new opportunities here as soon as your pay rate and eligibility line up.'
+          : 'Check back after facilities post new coverage needs.'}
       </p>
-      {supabaseMode ? (
-        <p className="mt-2 text-xs text-[#9AAAB3]">Shifts appear here after worker pay rates and eligibility are ready.</p>
-      ) : (
-        <Link to="/worker/onboarding" className="mt-4 inline-flex text-sm font-semibold text-[#53B59F] hover:underline">
+      {!supabaseMode && (
+        <Link to="/worker/onboarding" className="mt-4 inline-flex text-sm font-semibold text-[#2F8E7A] hover:underline">
           Review your profile →
         </Link>
       )}
@@ -155,8 +153,6 @@ export default function ShiftFeed() {
       shift => !previouslyWorkedOnly || Boolean(getSiteContinuity(continuity, shift.siteId)),
     );
 
-    // Promote one strong familiar opportunity only. A private worker return preference can break
-    // the tie, but it never bypasses eligibility/readiness and does not reorder the entire feed.
     if (!familiarOpportunity) return filtered;
     const promotedIndex = filtered.findIndex(shift => shift.id === familiarOpportunity.shift.id);
     if (promotedIndex <= 0) return filtered;
@@ -165,265 +161,308 @@ export default function ShiftFeed() {
     return [promoted, ...filtered.slice(0, promotedIndex), ...filtered.slice(promotedIndex + 1)];
   }, [shifts, previouslyWorkedOnly, continuity, familiarOpportunity]);
 
-  return (
-    <div className="min-h-[100svh] w-full max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 py-6 text-[#10283D]">
-      <div className="border-b border-[#DDE7E8] bg-white p-5 sm:p-6">
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <h1 className="text-2xl font-semibold text-[#13334F]">{supabaseMode ? 'Open shifts' : 'Available Shifts'}</h1>
-          <div className="flex shrink-0 gap-2">
-            <Link
-              to="/worker/credentials"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8EEF2] transition-colors hover:bg-[#DDE7E8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
-              aria-label="Credential passport"
-            >
-              <Shield className="h-5 w-5 text-[#13334F]" />
-            </Link>
-            <Link
-              to="/worker/account"
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E8EEF2] transition-colors hover:bg-[#DDE7E8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
-              aria-label="Account settings"
-            >
-              <Settings className="h-5 w-5 text-[#13334F]" />
-            </Link>
-          </div>
-        </div>
+  const featuredShift = useMemo(() => {
+    if (!visibleShifts.length) return undefined;
+    if (familiarOpportunity) {
+      const familiarVisible = visibleShifts.find(shift => shift.id === familiarOpportunity.shift.id);
+      if (familiarVisible) return familiarVisible;
+    }
+    return visibleShifts.find(shift => !shift.workerShiftReadiness || shift.workerShiftReadiness.isReady) ?? visibleShifts[0];
+  }, [visibleShifts, familiarOpportunity]);
 
-        {continuity.totalCompletedShifts > 0 && (
-          <div className="mb-5 rounded-2xl border border-[#DDE7E8] bg-[#F7FAFA] p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Your Covre</p>
-                <p className="mt-1 text-sm text-[#13334F]">
-                  {continuity.mostWorkedSite
-                    ? `${continuity.mostWorkedSite.siteName} is becoming a familiar place.`
-                    : 'Your work history is building here.'}
-                </p>
-              </div>
-              <Link to="/worker/bookings" className="shrink-0 text-xs font-semibold text-[#53B59F] hover:underline">
-                History
+  const featuredHistory = featuredShift ? getSiteContinuity(continuity, featuredShift.siteId) : undefined;
+  const featuredWantsReturn = featuredShift ? preferredReturnSites.has(featuredShift.siteId) : false;
+  const remainingShifts = featuredShift ? visibleShifts.filter(shift => shift.id !== featuredShift.id) : visibleShifts;
+
+  const handleSave = async (shiftId: string) => {
+    const result = await run(`save-${shiftId}`, () => saveShift(shiftId));
+    if (result.ok) {
+      toast.success(result.data.message);
+      setSavedByShift(prev => ({ ...prev, [shiftId]: true }));
+    } else {
+      toast.error(result.error.message);
+    }
+  };
+
+  const trackFamiliarOpen = (shiftId: string, siteId: string) => {
+    if (!familiarOpportunity || familiarOpportunity.shift.id !== shiftId) return;
+    trackContinuityEvent('worker_familiar_opportunity_open', {
+      actor: 'worker',
+      shiftId,
+      siteId,
+      source: familiarOpportunity.workerWantsReturn ? 'private_return_preference' : 'work_history',
+      completedShiftsHere: familiarOpportunity.history.completedShifts,
+    });
+  };
+
+  return (
+    <div className="min-h-[100svh] w-full max-w-full overflow-x-hidden bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-5 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Care worker</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Find your next shift.</h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">
+                Start with the strongest fit, then compare pay, timing, distance, and places that already know your work.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <Link
+                to="/worker/credentials"
+                className="flex h-10 w-10 items-center justify-center text-[#607583] transition-colors hover:text-[#13334F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+                aria-label="Credential passport"
+              >
+                <Shield className="h-5 w-5" />
+              </Link>
+              <Link
+                to="/worker/account"
+                className="flex h-10 w-10 items-center justify-center text-[#607583] transition-colors hover:text-[#13334F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+                aria-label="Account settings"
+              >
+                <Settings className="h-5 w-5" />
               </Link>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <div>
-                <p className="text-xl font-semibold text-[#13334F]">{continuity.totalCompletedShifts}</p>
-                <p className="text-xs text-[#607583]">approved work</p>
-              </div>
-              <div>
-                <p className="text-xl font-semibold text-[#13334F]">{continuity.familiarSiteCount}</p>
-                <p className="text-xs text-[#607583]">places known</p>
-              </div>
-              <div>
-                <p className="text-xl font-semibold text-[#13334F]">{continuity.repeatSiteCount}</p>
-                <p className="text-xs text-[#607583]">places returned to</p>
-              </div>
+          </div>
+
+          {continuity.totalCompletedShifts > 0 && (
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-[#EEF3F4] pt-4 text-xs text-[#607583]">
+              <span><strong className="font-semibold text-[#13334F]">{continuity.totalCompletedShifts}</strong> approved shifts</span>
+              <span><strong className="font-semibold text-[#13334F]">{continuity.familiarSiteCount}</strong> familiar places</span>
+              <span><strong className="font-semibold text-[#13334F]">{continuity.repeatSiteCount}</strong> repeat sites</span>
+              <Link to="/worker/bookings" className="font-semibold text-[#2F8E7A] hover:underline">View history</Link>
             </div>
+          )}
+        </header>
+
+        <div className="flex flex-col gap-4 border-b border-[#DDE7E8] py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-5" role="tablist" aria-label="Shift view mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'list'}
+              onClick={() => setViewMode('list')}
+              className={cn(
+                'inline-flex min-h-10 items-center gap-2 border-b-2 px-0 text-sm font-semibold transition-colors',
+                viewMode === 'list' ? 'border-[#53B59F] text-[#13334F]' : 'border-transparent text-[#7A8D98] hover:text-[#13334F]',
+              )}
+            >
+              <List className="h-4 w-4" aria-hidden /> List
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'map'}
+              onClick={() => setViewMode('map')}
+              className={cn(
+                'inline-flex min-h-10 items-center gap-2 border-b-2 px-0 text-sm font-semibold transition-colors',
+                viewMode === 'map' ? 'border-[#53B59F] text-[#13334F]' : 'border-transparent text-[#7A8D98] hover:text-[#13334F]',
+              )}
+            >
+              <MapIcon className="h-4 w-4" aria-hidden /> Map
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setPreviouslyWorkedOnly(value => !value)}
+            className={cn(
+              'inline-flex min-h-10 items-center gap-2 self-start rounded-full border px-3.5 text-sm font-semibold transition-colors sm:self-auto',
+              previouslyWorkedOnly
+                ? 'border-[#53B59F] bg-[#E6F6F2] text-[#257665]'
+                : 'border-[#DDE7E8] bg-white text-[#466170] hover:border-[#BFCED4] hover:text-[#13334F]',
+            )}
+          >
+            <Repeat2 className="h-4 w-4" aria-hidden /> Familiar places only
+          </button>
+        </div>
+
+        {supabaseMode && !loading && !error && (
+          <p className="py-3 text-xs text-[#9AAAB3]">Live Covre shifts. Eligibility and readiness stay connected to your profile.</p>
+        )}
+
+        {loading && <LoadingBlock />}
+        {error && (
+          <div className="py-4">
+            <ErrorBlock message={error.message} onRetry={reload} />
+            {supabaseMode && (
+              <Link to={WORKER_ENTRY_PATH} className="mt-3 block text-center text-sm font-semibold text-[#2F8E7A] hover:underline">
+                Sign in at /apply
+              </Link>
+            )}
           </div>
         )}
 
-        <div className="mb-4 flex min-w-0 justify-center px-0 sm:px-1">
-          <div className="inline-flex w-full max-w-md rounded-full bg-[#E8EEF2] p-1" role="tablist" aria-label="Shift view mode">
-            {([
-              { id: 'list' as const, label: 'List' },
-              { id: 'map' as const, label: 'Map' },
-            ] as const).map(({ id, label }) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={viewMode === id}
-                className={cn(
-                  'min-h-11 min-w-0 flex-1 rounded-full px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] sm:px-4',
-                  viewMode === id ? 'bg-white text-[#13334F] shadow-sm' : 'text-[#607583] hover:text-[#13334F]',
-                )}
-                onClick={() => setViewMode(id)}
-              >
-                {label}
-              </button>
-            ))}
+        {!loading && !error && shifts && visibleShifts.length === 0 && (
+          <div className="pt-4">
+            {viewMode === 'map' ? (
+              <WorkerShiftMap shifts={[]} selectedShiftId={selectedShiftId} onSelectShift={id => setSelectedShiftId(id)} />
+            ) : previouslyWorkedOnly ? (
+              <div className="border-y border-[#DDE7E8] py-12 text-center">
+                <p className="text-base font-semibold text-[#13334F]">Nothing open at a familiar place right now.</p>
+                <p className="mt-2 text-sm text-[#607583]">Your approved history stays ready for the next time those sites post.</p>
+                <button type="button" onClick={() => setPreviouslyWorkedOnly(false)} className="mt-4 text-sm font-semibold text-[#2F8E7A] hover:underline">
+                  Show all shifts
+                </button>
+              </div>
+            ) : (
+              <EmptyShiftState supabaseMode={supabaseMode} />
+            )}
           </div>
-        </div>
+        )}
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 sm:-mx-6 sm:px-6">
-          {filters.map(filter => {
-            const active = filter === 'Previously Worked' && previouslyWorkedOnly;
-            return (
-              <button
-                key={filter}
-                type="button"
-                onClick={() => {
-                  if (filter === 'Previously Worked') setPreviouslyWorkedOnly(value => !value);
-                }}
-                className={cn(
-                  'shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]',
-                  active ? 'bg-[#53B59F] text-white' : 'bg-[#E8EEF2] text-[#13334F] hover:bg-[#53B59F] hover:text-white',
-                )}
-              >
-                {filter}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {!loading && !error && familiarOpportunity && viewMode === 'list' && !previouslyWorkedOnly && (
-        <div className="mx-4 mt-4 overflow-hidden rounded-2xl border border-[#BFDCD5] bg-[#E6F6F2] shadow-sm">
-          <div className="p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white text-[#257665]">
-                {familiarOpportunity.workerWantsReturn ? <Heart className="h-5 w-5" aria-hidden /> : <Sparkles className="h-5 w-5" aria-hidden />}
+        {!loading && !error && shifts && visibleShifts.length > 0 && viewMode === 'list' && featuredShift && (
+          <>
+            <section className="border-b border-[#BFCED4] py-7">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">
+                <CheckCircle2 className="h-4 w-4" aria-hidden />
+                {featuredHistory ? 'Best next shift for you' : 'Strong next option'}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#257665]">
-                  {familiarOpportunity.workerWantsReturn ? 'A place you said you’d return to' : 'Familiar opportunity'}
-                </p>
-                <p className="mt-1 text-base font-semibold text-[#13334F]">
-                  {familiarOpportunity.shift.siteName} already knows your work.
-                </p>
-                <p className="mt-1 text-sm leading-5 text-[#607583]">
-                  {familiarOpportunity.workerWantsReturn
-                    ? `You privately told Covre you’d work here again, and you have ${familiarOpportunity.history.completedShifts} approved ${familiarOpportunity.history.completedShifts === 1 ? 'shift' : 'shifts'} here. Covre can use that preference to help surface this opportunity for you.`
-                    : `You have ${familiarOpportunity.history.completedShifts} approved ${familiarOpportunity.history.completedShifts === 1 ? 'shift' : 'shifts'} here. Familiarity is one reason Covre is surfacing this opportunity — alongside pay, readiness, and distance.`}
-                </p>
+
+              <div className="mt-4 flex items-start justify-between gap-5">
+                <div className="min-w-0">
+                  <h2 className="text-2xl font-semibold tracking-[-0.025em] text-[#13334F]">{featuredShift.roleTitle}</h2>
+                  <p className="mt-1 text-base text-[#466170]">{featuredShift.siteName || featuredShift.facilitySettingLabel}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-xl font-semibold text-[#13334F]">{displayWorkerPay(featuredShift)}</p>
+                  <p className="mt-1 text-xs text-[#607583]">Est. {featuredShift.estimatedTotalDisplay}</p>
+                </div>
               </div>
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-4 border-t border-[#BFDCD5] pt-4">
-              <div className="min-w-0">
-                <p className="font-semibold text-[#13334F]">{displayWorkerPay(familiarOpportunity.shift)}</p>
-                <p className="text-xs text-[#607583]">{familiarOpportunity.shift.dateLabel} · {familiarOpportunity.shift.distanceMiles}</p>
+
+              <div className="mt-5 grid gap-3 border-y border-[#DDE7E8] py-4 text-sm sm:grid-cols-3">
+                <div className="flex items-start gap-2">
+                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#2F8E7A]" aria-hidden />
+                  <span><strong className="font-semibold text-[#13334F]">{featuredShift.dateLabel}</strong><br /><span className="text-[#607583]">{featuredShift.timeRange}</span></span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#2F8E7A]" aria-hidden />
+                  <span><strong className="font-semibold text-[#13334F]">{featuredShift.distanceMiles}</strong><br /><span className="text-[#607583]">{featuredShift.facilitySettingLabel}</span></span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <Shield className="mt-0.5 h-4 w-4 shrink-0 text-[#2F8E7A]" aria-hidden />
+                  <span>
+                    <strong className="font-semibold text-[#13334F]">
+                      {featuredShift.workerShiftReadiness
+                        ? featuredShift.workerShiftReadiness.isReady ? 'Ready to request' : 'Needs credentials'
+                        : 'Profile ready'}
+                    </strong>
+                    <br />
+                    <span className="text-[#607583]">Readiness checked</span>
+                  </span>
+                </div>
               </div>
-              <Link
-                to={`/worker/shift/${familiarOpportunity.shift.id}`}
-                onClick={() =>
-                  trackContinuityEvent('worker_familiar_opportunity_open', {
-                    actor: 'worker',
-                    shiftId: familiarOpportunity.shift.id,
-                    siteId: familiarOpportunity.shift.siteId,
-                    source: familiarOpportunity.workerWantsReturn ? 'private_return_preference' : 'work_history',
-                    completedShiftsHere: familiarOpportunity.history.completedShifts,
-                  })
-                }
-                className="shrink-0 rounded-xl bg-[#13334F] px-4 py-2.5 text-sm font-semibold text-white no-underline hover:bg-[#0B243A]"
-              >
-                View shift
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {supabaseMode && (
-        <p className="mx-4 mt-4 text-xs text-[#9AAAB3]">Real open shifts from Covre. Familiarity uses approved work history; apply from shift detail.</p>
-      )}
+              {featuredHistory && (
+                <div className="mt-4 flex items-start gap-3 bg-[#E6F6F2] px-4 py-3">
+                  {featuredWantsReturn ? <Heart className="mt-0.5 h-4 w-4 shrink-0 text-[#257665]" aria-hidden /> : <Repeat2 className="mt-0.5 h-4 w-4 shrink-0 text-[#257665]" aria-hidden />}
+                  <p className="text-sm leading-5 text-[#466170]">
+                    <strong className="font-semibold text-[#257665]">
+                      {featuredWantsReturn ? 'You said you’d work here again.' : 'This place already knows your work.'}
+                    </strong>{' '}
+                    You have {featuredHistory.completedShifts} approved {featuredHistory.completedShifts === 1 ? 'shift' : 'shifts'} here
+                    {featuredHistory.lastWorkedLabel ? `, most recently ${featuredHistory.lastWorkedLabel}` : ''}.
+                  </p>
+                </div>
+              )}
 
-      {loading && <LoadingBlock />}
-      {error && (
-        <div className="py-4">
-          <ErrorBlock message={error.message} onRetry={reload} />
-          {supabaseMode && (
-            <Link to={WORKER_ENTRY_PATH} className="mx-4 mt-3 block text-center text-sm font-semibold text-[#53B59F] hover:underline">
-              Sign in at /apply
-            </Link>
-          )}
-        </div>
-      )}
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <Link
+                  to={`/worker/shift/${featuredShift.id}`}
+                  onClick={() => trackFamiliarOpen(featuredShift.id, featuredShift.siteId)}
+                  className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#53B59F] px-5 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#2F8E7A]"
+                >
+                  See shift details <ArrowRight className="h-4 w-4" aria-hidden />
+                </Link>
+                <button
+                  type="button"
+                  disabled={savedByShift[featuredShift.id] || isPending(`save-${featuredShift.id}`)}
+                  onClick={() => handleSave(featuredShift.id)}
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#DDE7E8] px-5 text-sm font-semibold text-[#13334F] transition-colors hover:border-[#BFCED4] hover:bg-[#F7FAFA] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Bookmark className="h-4 w-4" aria-hidden /> {savedByShift[featuredShift.id] ? 'Saved' : 'Save'}
+                </button>
+              </div>
+              {supabaseMode && appliedShiftIds.has(featuredShift.id) && <p className="mt-3 text-xs font-semibold text-[#2F8E7A]">Already requested</p>}
+            </section>
 
-      {!loading && !error && shifts && visibleShifts.length === 0 && (
-        <div className="mx-4 mt-4">
-          {viewMode === 'map' ? (
-            <WorkerShiftMap shifts={[]} selectedShiftId={selectedShiftId} onSelectShift={id => setSelectedShiftId(id)} />
-          ) : previouslyWorkedOnly ? (
-            <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center shadow-sm">
-              <p className="text-sm font-medium text-[#13334F]">No open shifts at familiar places right now.</p>
-              <p className="mt-2 text-xs text-[#607583]">Your approved work history stays here when those sites post again.</p>
-              <button type="button" onClick={() => setPreviouslyWorkedOnly(false)} className="mt-4 text-sm font-semibold text-[#53B59F] hover:underline">
-                Show all shifts
-              </button>
-            </div>
-          ) : supabaseMode ? (
-            <EmptyShiftState supabaseMode={supabaseMode} />
-          ) : (
-            <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center shadow-sm">
-              <p className="text-sm text-[#607583]">No shifts available.</p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {!loading && !error && shifts && visibleShifts.length > 0 && (
-        <div className="py-4">
-          {viewMode === 'list' ? (
-            <div className="space-y-4">
-              {visibleShifts.map(shift => {
-                const siteHistory = getSiteContinuity(continuity, shift.siteId);
-                const isRegularPlace = (siteHistory?.completedShifts ?? 0) >= 5;
-                const workerWantsReturn = preferredReturnSites.has(shift.siteId);
-                return (
-                  <div key={shift.id} className="min-w-0 max-w-full">
-                    <ShiftCard
-                      title={shift.roleTitle}
-                      facility={shift.siteName || shift.facilitySettingLabel}
-                      setting={shift.facilitySettingLabel}
-                      dateTime={`${shift.dateLabel} • ${shift.timeRange}`}
-                      pay={displayWorkerPay(shift)}
-                      paySubtext={`Est. ${shift.estimatedTotalDisplay}`}
-                      distance={shift.distanceMiles}
-                      duration="8 hrs"
-                      badges={shift.credentialTags}
-                      status={
-                        shift.workerShiftReadiness
-                          ? {
-                              variant: shift.workerShiftReadiness.isReady ? 'covered' : 'pending',
-                              label: shift.workerShiftReadiness.isReady ? 'Ready' : 'Needs credentials',
-                            }
-                          : shift.workerFeedCardStatus === 'preferred'
-                            ? { variant: 'preferred', label: 'Preferred' }
-                            : { variant: 'covered', label: 'Ready Match' }
-                      }
-                      to={`/worker/shift/${shift.id}`}
-                    >
-                      {siteHistory && (
-                        <div className="mt-3 border-t border-[#DDE7E8] pt-3 text-xs">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#E6F6F2] px-2.5 py-1 font-semibold text-[#257665]">
-                              {workerWantsReturn ? <Heart className="h-3.5 w-3.5" aria-hidden /> : <Repeat2 className="h-3.5 w-3.5" aria-hidden />}
-                              {workerWantsReturn ? 'You’d work here again' : isRegularPlace ? 'One of your regular places' : 'Familiar place'}
-                            </span>
-                            <span className="font-semibold text-[#257665]">Worked here {siteHistory.completedShifts}×</span>
-                          </div>
-                          {siteHistory.lastWorkedLabel && <p className="mt-2 text-[#607583]">Last approved work: {siteHistory.lastWorkedLabel}</p>}
-                        </div>
-                      )}
-                    </ShiftCard>
-                    {shift.workerShiftReadiness && <p className="mt-1 px-0.5 text-xs text-[#607583]">{shift.workerShiftReadiness.statusLabel}</p>}
-                    {supabaseMode && appliedShiftIds.has(shift.id) && <p className="mt-1 px-0.5 text-xs font-medium text-[#53B59F]">Applied</p>}
-                    <div className="mt-2 flex justify-end px-0.5">
-                      <button
-                        type="button"
-                        disabled={savedByShift[shift.id] || isPending(`save-${shift.id}`)}
-                        onClick={async e => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const r = await run(`save-${shift.id}`, () => saveShift(shift.id));
-                          if (r.ok) {
-                            toast.success(r.data.message);
-                            setSavedByShift(prev => ({ ...prev, [shift.id]: true }));
-                          } else toast.error(r.error.message);
-                        }}
-                        className="inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[#DDE7E8] bg-white px-3 py-2 text-xs font-semibold text-[#13334F] shadow-sm transition-colors hover:border-[#53B59F]/50 hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        <Bookmark className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                        {savedByShift[shift.id] ? 'Saved' : 'Save'}
-                      </button>
-                    </div>
+            {remainingShifts.length > 0 && (
+              <section className="pt-7">
+                <div className="flex items-end justify-between gap-4 pb-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Keep comparing</p>
+                    <h2 className="mt-1 text-xl font-semibold text-[#13334F]">{remainingShifts.length} more {remainingShifts.length === 1 ? 'shift' : 'shifts'}</h2>
                   </div>
-                );
-              })}
-            </div>
-          ) : (
+                  <p className="text-xs text-[#9AAAB3]">Pay · timing · fit</p>
+                </div>
+
+                <div className="border-t border-[#BFCED4]">
+                  {remainingShifts.map(shift => {
+                    const siteHistory = getSiteContinuity(continuity, shift.siteId);
+                    const workerWantsReturn = preferredReturnSites.has(shift.siteId);
+                    const isReady = !shift.workerShiftReadiness || shift.workerShiftReadiness.isReady;
+                    return (
+                      <article key={shift.id} className="border-b border-[#DDE7E8] py-5">
+                        <div className="flex items-start justify-between gap-5">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <h3 className="text-lg font-semibold text-[#13334F]">{shift.roleTitle}</h3>
+                              {!isReady && <span className="text-xs font-semibold text-[#A46A14]">Needs credentials</span>}
+                              {supabaseMode && appliedShiftIds.has(shift.id) && <span className="text-xs font-semibold text-[#2F8E7A]">Requested</span>}
+                            </div>
+                            <p className="mt-1 text-sm text-[#466170]">{shift.siteName || shift.facilitySettingLabel}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="font-semibold text-[#13334F]">{displayWorkerPay(shift)}</p>
+                            <p className="mt-1 text-xs text-[#607583]">Est. {shift.estimatedTotalDisplay}</p>
+                          </div>
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#607583]">
+                          <span>{shift.dateLabel} · {shift.timeRange}</span>
+                          <span>{shift.distanceMiles}</span>
+                          <span>{shift.facilitySettingLabel}</span>
+                        </div>
+
+                        {siteHistory && (
+                          <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-[#257665]">
+                            {workerWantsReturn ? <Heart className="h-3.5 w-3.5" aria-hidden /> : <Repeat2 className="h-3.5 w-3.5" aria-hidden />}
+                            <span>{workerWantsReturn ? 'You’d return here' : `Worked here ${siteHistory.completedShifts}×`}</span>
+                          </div>
+                        )}
+
+                        <div className="mt-4 flex items-center justify-between gap-4">
+                          <button
+                            type="button"
+                            disabled={savedByShift[shift.id] || isPending(`save-${shift.id}`)}
+                            onClick={() => handleSave(shift.id)}
+                            className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#607583] transition-colors hover:text-[#13334F] disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Bookmark className="h-4 w-4" aria-hidden /> {savedByShift[shift.id] ? 'Saved' : 'Save'}
+                          </button>
+                          <Link
+                            to={`/worker/shift/${shift.id}`}
+                            onClick={() => trackFamiliarOpen(shift.id, shift.siteId)}
+                            className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#2F8E7A] no-underline hover:text-[#257665]"
+                          >
+                            View shift <ArrowRight className="h-4 w-4" aria-hidden />
+                          </Link>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {!loading && !error && shifts && visibleShifts.length > 0 && viewMode === 'map' && (
+          <div className="pt-5">
             <WorkerShiftMap shifts={visibleShifts} selectedShiftId={selectedShiftId} onSelectShift={id => setSelectedShiftId(id)} />
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
