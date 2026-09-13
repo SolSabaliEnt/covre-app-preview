@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router';
-import { CheckCircle2, Circle } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Check, Circle, MapPin, UserRound } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
 import {
@@ -24,75 +24,79 @@ const roles = [
 
 const experienceLevels = ['New to care', '1–2 years', '3–5 years', '5+ years'];
 
-function MockOnboarding() {
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-
-  const toggleRole = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
-    );
-  };
-
+function RoleList({
+  selectedRoles,
+  toggleRole,
+  disabled = false,
+}: {
+  selectedRoles: string[];
+  toggleRole: (role: string) => void;
+  disabled?: boolean;
+}) {
   return (
-    <div className="flex min-h-[100svh] flex-col w-full max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))] text-[#10283D]">
-      <header className="mb-6">
-        <div className="mb-2 text-sm text-[#607583]">Step 1 of 6</div>
-        <h1 className="text-2xl font-semibold text-[#13334F]">Select your roles</h1>
-        <p className="mt-1 text-sm text-[#607583]">Choose all that apply</p>
-        <div
-          className="mt-4 h-1.5 overflow-hidden rounded-full bg-[#EEF4F5]"
-          role="progressbar"
-          aria-valuenow={16.67}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          <div className="h-full bg-[#53B59F]" style={{ width: '16.67%' }} />
-        </div>
-      </header>
-
-      <div className="space-y-3 pb-2">
-        {roles.map(role => (
+    <div className="border-t border-[#BFCED4]">
+      {roles.map(role => {
+        const selected = selectedRoles.includes(role);
+        return (
           <button
             key={role}
             type="button"
+            disabled={disabled}
             onClick={() => toggleRole(role)}
-            className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border-2 px-4 py-3.5 text-left transition-all ${
-              selectedRoles.includes(role)
-                ? 'border-[#53B59F] bg-[#F3FBF8]'
-                : 'border-[#DDE7E8] bg-white'
-            }`}
+            className="flex min-h-14 w-full items-center justify-between gap-4 border-b border-[#DDE7E8] py-3.5 text-left transition-colors hover:bg-[#F7FAFA] disabled:cursor-not-allowed disabled:opacity-60"
           >
+            <span className={selected ? 'font-semibold text-[#13334F]' : 'font-medium text-[#466170]'}>{role}</span>
             <span
-              className={`min-w-0 font-medium ${
-                selectedRoles.includes(role) ? 'text-[#13334F]' : 'text-[#607583]'
-              }`}
+              className={selected
+                ? 'flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#53B59F] text-white'
+                : 'flex h-6 w-6 shrink-0 items-center justify-center text-[#B5C3CA]'}
+              aria-hidden
             >
-              {role}
+              {selected ? <Check className="h-4 w-4" /> : <Circle className="h-5 w-5" />}
             </span>
-            {selectedRoles.includes(role) ? (
-              <CheckCircle2 className="h-5 w-5 shrink-0 text-[#53B59F]" aria-hidden />
-            ) : (
-              <Circle className="h-5 w-5 shrink-0 text-[#9AAAB3]" aria-hidden />
-            )}
           </button>
-        ))}
+        );
+      })}
+    </div>
+  );
+}
+
+function MockOnboarding() {
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const toggleRole = (role: string) => {
+    setSelectedRoles(prev => (prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]));
+  };
+
+  return (
+    <div className="min-h-[100svh] bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-2xl px-4 pb-32 pt-6 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Worker setup · 1 of 6</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">What kind of care work do you do?</h1>
+          <p className="mt-2 text-sm leading-6 text-[#607583]">Pick every role that fits. We’ll use this to show relevant shifts first.</p>
+        </header>
+
+        <section className="py-7">
+          <RoleList selectedRoles={selectedRoles} toggleRole={toggleRole} />
+          <p className="mt-3 text-xs text-[#9AAAB3]">You can update this later from your profile.</p>
+        </section>
       </div>
 
-      <div className="sticky bottom-0 -mx-4 mt-auto bg-[#F7FAFA]/95 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur">
-        <Link
-          to="/worker/credentials"
-          className={`flex min-h-14 w-full items-center justify-center rounded-xl px-6 py-4 font-medium transition-colors ${
-            selectedRoles.length > 0
-              ? 'bg-[#53B59F] text-white hover:bg-[#2F8E7A]'
-              : 'pointer-events-none bg-[#EEF4F5] text-[#9AAAB3]'
-          }`}
-          aria-disabled={selectedRoles.length === 0}
-          onClick={e => {
-            if (selectedRoles.length === 0) e.preventDefault();
-          }}
-        >
-          Continue
-        </Link>
+      <div className="fixed inset-x-0 bottom-0 border-t border-[#DDE7E8] bg-white/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+        <div className="mx-auto max-w-2xl">
+          <Link
+            to="/worker/credentials"
+            aria-disabled={selectedRoles.length === 0}
+            onClick={e => {
+              if (selectedRoles.length === 0) e.preventDefault();
+            }}
+            className={selectedRoles.length > 0
+              ? 'flex min-h-12 w-full items-center justify-center rounded-xl bg-[#53B59F] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#2F8E7A]'
+              : 'pointer-events-none flex min-h-12 w-full items-center justify-center rounded-xl bg-[#EEF3F4] px-6 text-sm font-semibold text-[#9AAAB3]'}
+          >
+            Continue
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -137,9 +141,7 @@ function SupabaseOnboarding() {
   }, [navigate]);
 
   const toggleRole = (role: string) => {
-    setSelectedRoles(prev =>
-      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role],
-    );
+    setSelectedRoles(prev => (prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]));
   };
 
   const buildDraft = (): WorkerProfileDraft => ({
@@ -183,185 +185,111 @@ function SupabaseOnboarding() {
     navigate('/worker/shifts', { replace: true });
   };
 
+  const completionCount = useMemo(() => {
+    let count = 0;
+    if (fullName.trim()) count += 1;
+    if (phone.trim()) count += 1;
+    if (city.trim() || state.trim()) count += 1;
+    if (selectedRoles.length) count += 1;
+    if (experienceLevel) count += 1;
+    if (availability.trim()) count += 1;
+    return count;
+  }, [fullName, phone, city, state, selectedRoles, experienceLevel, availability]);
+
   if (loading) {
-    return (
-      <div className="flex min-h-[100svh] items-center justify-center bg-[#F7FAFA] px-4 text-sm text-[#607583]">
-        Loading profile…
-      </div>
-    );
+    return <div className="flex min-h-[100svh] items-center justify-center bg-white px-4 text-sm text-[#607583]">Loading profile…</div>;
   }
 
+  const inputClass = 'min-h-12 w-full border-b border-[#BFCED4] bg-transparent px-0 text-[#13334F] outline-none transition-colors placeholder:text-[#A5B3BA] focus:border-[#53B59F]';
+
   return (
-    <div className="flex min-h-[100svh] flex-col w-full max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 pt-6 pb-[calc(2rem+env(safe-area-inset-bottom))] text-[#10283D]">
-      <header className="mb-6">
-        <p className="mb-2 text-sm text-[#607583]">Worker setup</p>
-        <h1 className="text-2xl font-semibold text-[#13334F]">Your profile</h1>
-        <p className="mt-1 text-sm text-[#607583]">
-          Tell facilities who you are before you apply for shifts. Credentials and shift discovery
-          come next.
-        </p>
-      </header>
-
-      <form
-        className="space-y-5 pb-28"
-        onSubmit={e => {
-          e.preventDefault();
-          void handleComplete();
-        }}
-        noValidate
-      >
-        <div className="space-y-2">
-          <label htmlFor="worker-full-name" className="text-sm font-medium text-[#13334F]">
-            Full name
-          </label>
-          <input
-            id="worker-full-name"
-            type="text"
-            autoComplete="name"
-            value={fullName}
-            onChange={e => setFullName(e.target.value)}
-            disabled={submitting}
-            className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="worker-phone" className="text-sm font-medium text-[#13334F]">
-            Phone
-          </label>
-          <input
-            id="worker-phone"
-            type="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={e => setPhone(e.target.value)}
-            disabled={submitting}
-            className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-2">
-            <label htmlFor="worker-city" className="text-sm font-medium text-[#13334F]">
-              City
-            </label>
-            <input
-              id="worker-city"
-              type="text"
-              autoComplete="address-level2"
-              value={city}
-              onChange={e => setCity(e.target.value)}
-              disabled={submitting}
-              className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-            />
+    <div className="min-h-[100svh] bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-2xl px-4 pb-36 pt-6 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Worker setup</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Build the profile facilities will see.</h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">Enough detail to match you well, without turning setup into paperwork.</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <p className="text-2xl font-semibold text-[#13334F]">{completionCount}/6</p>
+              <p className="text-xs text-[#607583]">sections filled</p>
+            </div>
           </div>
-          <div className="space-y-2">
-            <label htmlFor="worker-state" className="text-sm font-medium text-[#13334F]">
-              State
-            </label>
-            <input
-              id="worker-state"
-              type="text"
-              autoComplete="address-level1"
-              value={state}
-              onChange={e => setState(e.target.value)}
-              disabled={submitting}
-              className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-            />
-          </div>
-        </div>
+        </header>
 
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-[#13334F]">Role interest</p>
-          <p className="text-xs text-[#607583]">Choose all that apply</p>
-          <div className="space-y-2">
-            {roles.map(role => (
-              <button
-                key={role}
-                type="button"
-                onClick={() => toggleRole(role)}
-                disabled={submitting}
-                className={`flex min-h-12 w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left ${
-                  selectedRoles.includes(role)
-                    ? 'border-[#53B59F] bg-[#F3FBF8]'
-                    : 'border-[#DDE7E8] bg-white'
-                }`}
-              >
-                <span className="font-medium text-[#13334F]">{role}</span>
-                {selectedRoles.includes(role) ? (
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-[#53B59F]" aria-hidden />
-                ) : (
-                  <Circle className="h-5 w-5 shrink-0 text-[#9AAAB3]" aria-hidden />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="worker-experience" className="text-sm font-medium text-[#13334F]">
-            Experience level
-          </label>
-          <select
-            id="worker-experience"
-            value={experienceLevel}
-            onChange={e => setExperienceLevel(e.target.value)}
-            disabled={submitting}
-            className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-          >
-            <option value="">Select…</option>
-            {experienceLevels.map(level => (
-              <option key={level} value={level}>
-                {level}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="worker-availability" className="text-sm font-medium text-[#13334F]">
-            Availability <span className="font-normal text-[#9AAAB3]">(optional)</span>
-          </label>
-          <input
-            id="worker-availability"
-            type="text"
-            placeholder="e.g. Weekdays, overnights"
-            value={availability}
-            onChange={e => setAvailability(e.target.value)}
-            disabled={submitting}
-            className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-4 text-[#13334F]"
-          />
-          <p className="text-xs text-[#9AAAB3]">
-            Availability is stored on your account for now; scheduling rules come in a later release.
-          </p>
-        </div>
-      </form>
-
-      <div className="sticky bottom-0 -mx-4 mt-auto flex flex-col gap-2 bg-[#F7FAFA]/95 px-4 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur">
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={() => void handleSave()}
-          className="min-h-12 w-full rounded-xl border border-[#DDE7E8] bg-white px-6 py-3 font-medium text-[#13334F] hover:border-[#53B59F]"
+        <form
+          className="pb-4"
+          onSubmit={e => {
+            e.preventDefault();
+            void handleComplete();
+          }}
+          noValidate
         >
-          Save draft
-        </button>
-        <button
-          type="button"
-          disabled={submitting}
-          onClick={() => void handleComplete()}
-          className="min-h-14 w-full rounded-xl bg-[#53B59F] px-6 py-4 font-medium text-white hover:bg-[#2F8E7A] disabled:opacity-60"
-        >
-          {submitting ? 'Saving…' : 'Complete profile'}
-        </button>
+          <section className="border-b border-[#DDE7E8] py-7">
+            <div className="mb-5 flex items-center gap-2">
+              <UserRound className="h-4 w-4 text-[#2F8E7A]" aria-hidden />
+              <h2 className="text-sm font-semibold uppercase tracking-[0.12em] text-[#607583]">Your basics</h2>
+            </div>
+            <div className="space-y-6">
+              <div>
+                <label htmlFor="worker-full-name" className="text-sm font-semibold text-[#13334F]">Full name</label>
+                <input id="worker-full-name" type="text" autoComplete="name" value={fullName} onChange={e => setFullName(e.target.value)} disabled={submitting} className={inputClass} />
+              </div>
+              <div>
+                <label htmlFor="worker-phone" className="text-sm font-semibold text-[#13334F]">Phone</label>
+                <input id="worker-phone" type="tel" autoComplete="tel" value={phone} onChange={e => setPhone(e.target.value)} disabled={submitting} className={inputClass} />
+              </div>
+              <div>
+                <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-[#13334F]"><MapPin className="h-4 w-4 text-[#2F8E7A]" aria-hidden />Home area</div>
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label htmlFor="worker-city" className="sr-only">City</label>
+                    <input id="worker-city" type="text" autoComplete="address-level2" placeholder="City" value={city} onChange={e => setCity(e.target.value)} disabled={submitting} className={inputClass} />
+                  </div>
+                  <div>
+                    <label htmlFor="worker-state" className="sr-only">State</label>
+                    <input id="worker-state" type="text" autoComplete="address-level1" placeholder="State" value={state} onChange={e => setState(e.target.value)} disabled={submitting} className={inputClass} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="border-b border-[#DDE7E8] py-7">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">What you do</p>
+            <h2 className="mt-1 text-xl font-semibold text-[#13334F]">Select every role that fits.</h2>
+            <p className="mt-1 text-sm text-[#607583]">These choices shape the shifts Covre surfaces first.</p>
+            <div className="mt-5"><RoleList selectedRoles={selectedRoles} toggleRole={toggleRole} disabled={submitting} /></div>
+          </section>
+
+          <section className="border-b border-[#DDE7E8] py-7">
+            <label htmlFor="worker-experience" className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">Experience</label>
+            <select id="worker-experience" value={experienceLevel} onChange={e => setExperienceLevel(e.target.value)} disabled={submitting} className={`${inputClass} mt-2 appearance-none`}>
+              <option value="">Choose your level</option>
+              {experienceLevels.map(level => <option key={level} value={level}>{level}</option>)}
+            </select>
+          </section>
+
+          <section className="py-7">
+            <label htmlFor="worker-availability" className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">When you want to work</label>
+            <input id="worker-availability" type="text" placeholder="Weekdays, overnights, weekends…" value={availability} onChange={e => setAvailability(e.target.value)} disabled={submitting} className={`${inputClass} mt-2`} />
+            <p className="mt-2 text-xs leading-5 text-[#9AAAB3]">Keep this simple for now. Covre will use richer scheduling preferences as they come online.</p>
+          </section>
+        </form>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 border-t border-[#DDE7E8] bg-white/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur">
+        <div className="mx-auto flex max-w-2xl gap-3">
+          <button type="button" disabled={submitting} onClick={() => void handleSave()} className="min-h-12 flex-1 rounded-xl border border-[#DDE7E8] px-4 text-sm font-semibold text-[#13334F] hover:bg-[#F7FAFA] disabled:opacity-60">Save draft</button>
+          <button type="button" disabled={submitting} onClick={() => void handleComplete()} className="min-h-12 flex-[1.4] rounded-xl bg-[#53B59F] px-4 text-sm font-semibold text-white hover:bg-[#2F8E7A] disabled:opacity-60">{submitting ? 'Saving…' : 'Finish profile'}</button>
+        </div>
       </div>
     </div>
   );
 }
 
 export default function Onboarding() {
-  if (isSupabaseBackendEnabled()) {
-    return <SupabaseOnboarding />;
-  }
-  return <MockOnboarding />;
+  return isSupabaseBackendEnabled() ? <SupabaseOnboarding /> : <MockOnboarding />;
 }
