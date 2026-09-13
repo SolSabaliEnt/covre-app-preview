@@ -15,6 +15,7 @@ import AuthAdminEntry from './pages/AuthAdminEntry';
 import WorkerSplash from './pages/worker/Splash';
 import WorkerWelcome from './pages/worker/Welcome';
 import WorkerOnboarding from './pages/worker/Onboarding';
+import WorkerProfile from './pages/worker/Profile';
 import WorkerCredentials from './pages/worker/Credentials';
 import WorkerShiftFeed from './pages/worker/ShiftFeed';
 import WorkerBookings from './pages/worker/Bookings';
@@ -34,6 +35,7 @@ import ProviderWorkerMatch from './pages/provider/WorkerMatch';
 import ProviderWorkers from './pages/provider/Workers';
 import ProviderBench from './pages/provider/Bench';
 import ProviderMore from './pages/provider/More';
+import ProviderProfile from './pages/provider/Profile';
 import ProviderTimesheets from './pages/provider/Timesheets';
 import ProviderBilling from './pages/provider/Billing';
 import ProviderSites from './pages/provider/Sites';
@@ -65,6 +67,7 @@ const workerProtectedRoute = {
   element: <ProtectedRoute allowedRoles={['worker']} />,
   children: [
     { path: 'onboarding', Component: WorkerOnboarding },
+    { path: 'profile', Component: WorkerProfile },
     { path: 'credentials', Component: WorkerCredentials },
     { path: 'shifts', Component: WorkerShiftFeed },
     { path: 'bookings', Component: WorkerBookings },
@@ -94,6 +97,7 @@ const providerProtectedRoute = {
         { path: 'workers/:workerId', Component: ProviderWorkerProfile },
         { path: 'bench', Component: ProviderBench },
         { path: 'more', Component: ProviderMore },
+        { path: 'profile', Component: ProviderProfile },
         { path: 'onboarding', Component: ProviderOnboarding },
         { path: 'sites', Component: ProviderSites },
         { path: 'sites/new', Component: ProviderNewSite },
@@ -114,6 +118,7 @@ const adminWorkerPreviewRoutes = [
   { path: 'full-app/worker/splash', element: <AdminPreviewFrame audience="Worker"><WorkerSplash /></AdminPreviewFrame> },
   { path: 'full-app/worker/welcome', element: <AdminPreviewFrame audience="Worker"><WorkerWelcome /></AdminPreviewFrame> },
   { path: 'full-app/worker/onboarding', element: <AdminPreviewFrame audience="Worker"><WorkerOnboarding /></AdminPreviewFrame> },
+  { path: 'full-app/worker/profile', element: <AdminPreviewFrame audience="Worker"><WorkerProfile /></AdminPreviewFrame> },
   { path: 'full-app/worker/credentials', element: <AdminPreviewFrame audience="Worker"><WorkerCredentials /></AdminPreviewFrame> },
   { path: 'full-app/worker/shifts', element: <AdminPreviewFrame audience="Worker"><WorkerShiftFeed /></AdminPreviewFrame> },
   { path: 'full-app/worker/shift/:id', element: <AdminPreviewFrame audience="Worker"><WorkerShiftDetail /></AdminPreviewFrame> },
@@ -129,6 +134,7 @@ const adminWorkerPreviewRoutes = [
 
 const adminProviderPreviewRoutes = [
   { path: 'full-app/provider', element: <AdminPreviewFrame audience="Provider"><ProviderDashboard /></AdminPreviewFrame> },
+  { path: 'full-app/provider/profile', element: <AdminPreviewFrame audience="Provider"><ProviderProfile /></AdminPreviewFrame> },
   { path: 'full-app/provider/onboarding', element: <AdminPreviewFrame audience="Provider"><ProviderOnboarding /></AdminPreviewFrame> },
   { path: 'full-app/provider/post-shift', element: <AdminPreviewFrame audience="Provider"><ProviderPostShift /></AdminPreviewFrame> },
   { path: 'full-app/provider/shifts', element: <AdminPreviewFrame audience="Provider"><ProviderShiftManagement /></AdminPreviewFrame> },
