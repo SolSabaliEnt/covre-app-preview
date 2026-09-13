@@ -16,6 +16,7 @@ import { WORKER_ENTRY_PATH } from '../../lib/entryRoutes';
 import { getWorkerAccount } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
+import { WORKER_PROFILE_PHOTO_KEY, useStoredProfileImage } from '../../lib/profileMedia';
 
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
@@ -31,6 +32,7 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
 export default function WorkerAccount() {
   const navigate = useNavigate();
   const { name, logout, isAuthenticated } = useAuth();
+  const profilePhoto = useStoredProfileImage(WORKER_PROFILE_PHOTO_KEY);
   const { data: accountStub, error, loading, reload } = useAsyncResource(() => getWorkerAccount(), []);
 
   const displayName = loading
@@ -46,6 +48,7 @@ export default function WorkerAccount() {
   };
 
   const rows = [
+    { to: '/worker/profile' as const, label: 'Professional profile', sub: 'Photo, roles, location, and availability.', icon: User },
     { to: '/worker/credentials' as const, label: 'Credential Passport', sub: 'Keep your readiness portable.', icon: BadgeCheck },
     { to: '/worker/reputation' as const, label: 'Covre Score', sub: 'See the work history behind your standing.', icon: Star },
     { to: '/worker/pay' as const, label: 'Earnings & payouts', sub: 'Track approved work and payout readiness.', icon: CreditCard },
@@ -59,8 +62,8 @@ export default function WorkerAccount() {
         <header className="border-b border-[#DDE7E8] pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Your Covre</p>
           <div className="mt-3 flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]">
-              <User className="h-6 w-6" aria-hidden />
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E6F6F2] text-[#257665]">
+              {profilePhoto ? <img src={profilePhoto} alt="Care worker profile" className="h-full w-full object-cover" /> : <User className="h-6 w-6" aria-hidden />}
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl font-semibold tracking-[-0.025em] text-[#13334F]">{displayName}</h1>
@@ -69,7 +72,7 @@ export default function WorkerAccount() {
                 <p className="mt-2 text-xs text-[#9AAAB3]">{[accountStub?.location, accountStub?.phone].filter(Boolean).join(' · ')}</p>
               ) : null}
             </div>
-            <Link to="/worker/onboarding" className="shrink-0 text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">Edit profile</Link>
+            <Link to="/worker/profile" className="shrink-0 text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">Edit profile</Link>
           </div>
         </header>
 
