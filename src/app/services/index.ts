@@ -22,6 +22,7 @@ export * from './providerShiftInvitationService';
 export * from './providerApplicantReviewService';
 export * from './providerApplicantReviewTypes';
 export * from './profileMediaService';
+export * from './providerAvatarService';
 export {
   bookWorkerForShift,
   inviteWorkerToShift,
