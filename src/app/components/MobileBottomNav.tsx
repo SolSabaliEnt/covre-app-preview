@@ -12,36 +12,40 @@ export type MobileBottomNavItem = {
 
 type MobileBottomNavProps = {
   items: MobileBottomNavItem[];
-  /** e.g. "Worker navigation" */
   'aria-label': string;
   className?: string;
 };
 
-/**
- * Shared fixed bottom tab bar for worker and provider mobile shells.
- */
 export function MobileBottomNav({ items, 'aria-label': ariaLabel, className }: MobileBottomNavProps) {
   return (
     <nav
       className={cn(
-        'fixed bottom-0 left-0 right-0 z-50 border-t border-[#DDE7E8] bg-white px-2 pt-2',
+        'fixed inset-x-0 bottom-0 z-50 border-t border-[#DDE7E8] bg-white/96 px-2 pt-1.5 backdrop-blur',
         className,
       )}
-      style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+      style={{ paddingBottom: 'max(0.6rem, env(safe-area-inset-bottom))' }}
       aria-label={ariaLabel}
     >
-      <div className="flex items-stretch justify-around">
+      <div className="mx-auto flex max-w-3xl items-stretch justify-around">
         {items.map(({ to, label, icon: Icon, active }) => (
           <Link
             key={`${label}-${to}`}
             to={to}
             onClick={() => resetRouteScrollNow()}
+            aria-current={active ? 'page' : undefined}
             className={cn(
-              'flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[13px] leading-tight transition-colors',
-              active ? 'font-semibold text-[#53B59F]' : 'font-medium text-[#607583]',
+              'relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] leading-tight transition-colors sm:text-xs',
+              active ? 'font-semibold text-[#13334F]' : 'font-medium text-[#7A8D98] hover:text-[#13334F]',
             )}
           >
-            <Icon className="h-7 w-7 shrink-0" aria-hidden strokeWidth={active ? 2.25 : 2} />
+            <span
+              className={cn(
+                'absolute inset-x-4 top-0 h-0.5 rounded-full transition-opacity',
+                active ? 'bg-[#53B59F] opacity-100' : 'opacity-0',
+              )}
+              aria-hidden
+            />
+            <Icon className={cn('h-5 w-5 shrink-0', active && 'text-[#2F8E7A]')} aria-hidden strokeWidth={active ? 2.3 : 2} />
             <span className="truncate">{label}</span>
           </Link>
         ))}
