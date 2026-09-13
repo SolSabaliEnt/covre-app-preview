@@ -35,7 +35,7 @@ export function WorkerAppShell() {
   }));
 
   return (
-    <div className="flex h-[100dvh] max-h-[100svh] w-full max-w-full flex-col overflow-hidden bg-white text-[#10283D]">
+    <div className="worker-ui flex h-[100dvh] max-h-[100svh] w-full max-w-full flex-col overflow-hidden bg-white text-[#10283D]">
       <main
         data-route-scroll-root="true"
         data-route-scroll-container="true"
