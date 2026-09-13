@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, Camera, CheckCircle2, MapPin, Users, X } from 'lu
 import { Link } from 'react-router';
 import { toast } from 'sonner';
 import { getProviderSettingsSummary } from '../../services';
+import type { ProviderSettingsSummary } from '../../services/types';
 import {
   PROVIDER_LOGO_KEY,
   PROVIDER_PROFILE_ABOUT_KEY,
@@ -17,7 +18,7 @@ export default function ProviderProfile() {
   const logo = useStoredProfileImage(PROVIDER_LOGO_KEY);
   const [about, setAbout] = useState(() => getStoredProfileText(PROVIDER_PROFILE_ABOUT_KEY));
   const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState<Awaited<ReturnType<typeof getProviderSettingsSummary>> extends { ok: true; data: infer T } ? T : never>();
+  const [summary, setSummary] = useState<ProviderSettingsSummary | null>(null);
 
   useEffect(() => {
     let cancelled = false;
