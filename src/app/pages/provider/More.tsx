@@ -21,6 +21,7 @@ import { PROVIDER_ENTRY_PATH } from '../../lib/entryRoutes';
 import { getProviderOnboardingStatus } from '../../services';
 
 const links = [
+  { to: '/provider/profile', label: 'Organization profile', description: 'Logo, organization identity, and workspace details.', icon: Building2, status: null },
   { to: '/provider/team', label: 'Team & Invites', description: 'Invite schedulers, billing users, and admins.', icon: UserPlus, status: null },
   { to: '/provider/onboarding', label: 'Provider setup', description: 'Update organization, site, and staffing setup.', icon: ListChecks, status: null },
   { to: '/provider/sites/new', label: 'Add care site', description: 'Register a new facility or home.', icon: PlusCircle, status: null },
