@@ -53,9 +53,25 @@ const careSettings = [
 export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-[#10283D]">
-      <section className="relative overflow-hidden bg-[#13334F] text-white">
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-[44%] bg-[radial-gradient(circle_at_70%_25%,rgba(83,181,159,0.14),transparent_52%)]" />
-        <div className="relative mx-auto max-w-7xl px-5 pb-16 pt-5 sm:px-6 lg:pb-24 lg:pt-6">
+      <section className="relative min-h-[720px] overflow-hidden bg-[#13334F] text-white sm:min-h-[760px] lg:min-h-[780px]">
+        <video
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center lg:object-[62%_center] motion-reduce:hidden"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          tabIndex={-1}
+        >
+          <source src="/covre-header-background.mp4" type="video/mp4" />
+        </video>
+
+        <div className="pointer-events-none absolute inset-0 bg-[#0B243A]/58" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,36,58,0.96)_0%,rgba(11,36,58,0.88)_34%,rgba(11,36,58,0.58)_62%,rgba(11,36,58,0.38)_100%)] sm:bg-[linear-gradient(90deg,rgba(11,36,58,0.97)_0%,rgba(11,36,58,0.9)_34%,rgba(11,36,58,0.52)_62%,rgba(11,36,58,0.28)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#0B243A]/70 to-transparent" />
+
+        <div className="relative z-10 mx-auto flex min-h-[720px] max-w-7xl flex-col px-5 pb-10 pt-5 sm:min-h-[760px] sm:px-6 lg:min-h-[780px] lg:pb-14 lg:pt-6">
           <header className="flex items-center justify-between gap-4">
             <Link to="/" className="block min-w-0 shrink">
               <img
@@ -69,7 +85,7 @@ export default function Landing() {
               />
             </Link>
 
-            <nav className="hidden items-center gap-8 text-sm font-medium text-white/70 md:flex" aria-label="Primary">
+            <nav className="hidden items-center gap-8 text-sm font-medium text-white/72 md:flex" aria-label="Primary">
               <a href="#how-it-works" className="transition-colors hover:text-white">How it works</a>
               <a href="#providers" className="transition-colors hover:text-white">Providers</a>
               <a href="#workers" className="transition-colors hover:text-white">Care workers</a>
@@ -81,84 +97,56 @@ export default function Landing() {
               </Link>
               <Link
                 to={PROVIDER_ENTRY_PATH}
-                className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-[#13334F] transition-transform hover:-translate-y-0.5 sm:px-5"
+                className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-[#13334F] shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition-transform hover:-translate-y-0.5 sm:px-5"
               >
                 Facility access
               </Link>
             </div>
           </header>
 
-          <div className="grid gap-14 pt-16 lg:grid-cols-[1.05fr_0.95fr] lg:items-end lg:gap-20 lg:pt-24">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#9EDDD0]">
+          <div className="flex flex-1 items-center py-14 sm:py-16 lg:py-20">
+            <div className="max-w-[760px]">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#B7E4DA]">
                 <ShieldCheck className="h-4 w-4" aria-hidden />
                 Care staffing built around trust
               </div>
 
-              <h1 className="mt-6 text-[3.15rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-[5rem]">
+              <h1 className="mt-6 text-[3.15rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white drop-shadow-[0_2px_22px_rgba(0,0,0,0.18)] sm:text-6xl lg:text-[5rem]">
                 Fill the shift.
                 <br />
                 Know who&apos;s walking through the door.
               </h1>
 
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-white/72 sm:text-xl">
+              <p className="mt-7 max-w-2xl text-lg leading-8 text-white/80 sm:text-xl">
                 Covre helps care providers cover open shifts with qualified professionals — and gives care workers the context they need before they commit.
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
                 <Link
                   to={PROVIDER_ENTRY_PATH}
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#53B59F] px-6 text-base font-semibold text-white transition-colors hover:bg-[#2F8E7A]"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#53B59F] px-6 text-base font-semibold text-white shadow-[0_14px_32px_rgba(0,0,0,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#2F8E7A]"
                 >
                   Cover a shift <ArrowRight className="h-5 w-5" aria-hidden />
                 </Link>
                 <Link
                   to={WORKER_ENTRY_PATH}
-                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-white/25 px-6 text-base font-semibold text-white transition-colors hover:bg-white/5"
+                  className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-white/32 bg-[#0B243A]/24 px-6 text-base font-semibold text-white backdrop-blur-[2px] transition-colors hover:bg-white/10"
                 >
                   Find care shifts <ChevronRight className="h-5 w-5" aria-hidden />
                 </Link>
               </div>
 
-              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/60">
+              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/68">
                 <TrustPoint icon={<BadgeCheck className="h-4 w-4" />} text="Credential-aware" />
                 <TrustPoint icon={<MapPin className="h-4 w-4" />} text="Site-ready context" />
                 <TrustPoint icon={<FileCheck2 className="h-4 w-4" />} text="Shift-level record" />
               </div>
             </div>
+          </div>
 
-            <div className="lg:border-l lg:border-white/14 lg:pl-10">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/45">Tonight · 7 PM–7 AM</p>
-              <div className="mt-3 flex items-start justify-between gap-5 border-b border-white/14 pb-6">
-                <div>
-                  <h2 className="text-2xl font-semibold text-white">CNA · Memory care</h2>
-                  <p className="mt-2 flex items-center gap-2 text-sm text-white/60">
-                    <MapPin className="h-4 w-4" aria-hidden /> Residential care site
-                  </p>
-                </div>
-                <span className="text-sm font-semibold text-[#F6C979]">Urgent</span>
-              </div>
-
-              <div className="py-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#9EDDD0]">Best fit surfaced</p>
-                <div className="mt-4 flex items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#E6F6F2] font-bold text-[#257665]">MR</div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-white">Matched care professional</p>
-                    <p className="mt-1 text-sm text-white/55">Credential ready · site-ready · worked here before</p>
-                  </div>
-                  <BadgeCheck className="h-5 w-5 shrink-0 text-[#7BD0BD]" aria-hidden />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 border-y border-white/14 py-5 text-sm">
-                <HeroStat label="Credentials" value="Ready" />
-                <HeroStat label="Site context" value="Reviewed" bordered />
-                <HeroStat label="Status" value="Covered" bordered />
-              </div>
-
-              <p className="mt-5 text-sm text-white/55">The shift context stays connected from post through closeout.</p>
-            </div>
+          <div className="flex items-center gap-3 border-t border-white/14 pt-5 text-xs font-medium text-white/55 sm:text-sm">
+            <span className="h-2 w-2 rounded-full bg-[#7BD0BD]" />
+            Qualified care professionals. Clear site context. One connected shift record.
           </div>
         </div>
       </section>
@@ -368,15 +356,6 @@ export default function Landing() {
 
 function TrustPoint({ icon, text }: { icon: React.ReactNode; text: string }) {
   return <div className="flex items-center gap-2"><span className="text-[#7BD0BD]">{icon}</span><span>{text}</span></div>;
-}
-
-function HeroStat({ label, value, bordered = false }: { label: string; value: string; bordered?: boolean }) {
-  return (
-    <div className={bordered ? 'border-l border-white/14 pl-4 sm:pl-5' : ''}>
-      <p className="text-[11px] text-white/45">{label}</p>
-      <p className="mt-1 font-semibold text-white">{value}</p>
-    </div>
-  );
 }
 
 function ProcessRow({ number, icon, title, body, last = false }: { number: string; icon: React.ReactNode; title: string; body: string; last?: boolean }) {
