@@ -6,38 +6,54 @@ const rootElement = document.getElementById("root")!;
 createRoot(rootElement).render(<App />);
 
 function configureCovreHeroVideo(): boolean {
-  const source = document.querySelector<HTMLSourceElement>(
-    'video source[src="/covre-header-background.mp4"]',
-  );
-  const video = source?.parentElement as HTMLVideoElement | null;
-
+  const video = document.querySelector<HTMLVideoElement>("section > video[autoplay]");
   if (!video) return false;
   if (video.dataset.covreHeroConfigured === "true") return true;
 
   video.dataset.covreHeroConfigured = "true";
-  video.poster = "/covre-header-poster.jpg";
-  video.src = "/covre-header-background-web.mp4";
+  video.poster = "/covre-header-poster.jpg?v=bf932b3";
+  video.src = "/covre-header-background-web.mp4?v=bf932b3";
   video.preload = "auto";
   video.autoplay = true;
   video.loop = true;
   video.muted = true;
   video.defaultMuted = true;
   video.playsInline = true;
+  video.setAttribute("autoplay", "");
+  video.setAttribute("muted", "");
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "true");
+  video.style.display = "block";
+  video.style.visibility = "visible";
+  video.style.opacity = "1";
 
-  source.remove();
+  video.querySelectorAll("source").forEach(source => source.remove());
   video.load();
 
-  const startPlayback = () => {
+  const tryPlay = () => {
+    video.muted = true;
     void video.play().catch(() => {
-      // The poster remains visible when autoplay is blocked.
+      // Poster remains visible; retry on the next media/user event.
     });
   };
 
-  if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-    startPlayback();
-  } else {
-    video.addEventListener("canplay", startPlayback, { once: true });
-  }
+  video.addEventListener("loadeddata", tryPlay);
+  video.addEventListener("canplay", tryPlay);
+  video.addEventListener("canplaythrough", tryPlay);
+
+  window.setTimeout(tryPlay, 150);
+  window.setTimeout(tryPlay, 700);
+  window.setTimeout(tryPlay, 1800);
+
+  const retryAfterInteraction = () => tryPlay();
+  window.addEventListener("pointerdown", retryAfterInteraction, { once: true, passive: true });
+  window.addEventListener("keydown", retryAfterInteraction, { once: true });
+  window.addEventListener("scroll", retryAfterInteraction, { once: true, passive: true });
+  window.addEventListener("mousemove", retryAfterInteraction, { once: true, passive: true });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") tryPlay();
+  });
 
   return true;
 }
