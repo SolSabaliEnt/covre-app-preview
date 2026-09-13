@@ -2,12 +2,13 @@
 @import './tailwind.css';
 @import './theme.css';
 
-/* Landing hero video tuning. The video uses a nested <source>, so target the
-   hero section's direct autoplay video rather than video[src=...]. */
+/* Landing hero video tuning. The optimized web video is paired with a poster
+   fallback so the human visual remains visible even when autoplay is blocked. */
 section > video[autoplay] {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  background: #13334F url('/covre-header-poster.jpg') center center / cover no-repeat;
   filter: saturate(0.94) contrast(1.03);
   transform: scale(1.04);
   transform-origin: center center;
@@ -30,6 +31,7 @@ section > video[autoplay] + div + div {
 @media (min-width: 1024px) {
   section > video[autoplay] {
     object-position: center center !important;
+    background-position: center center;
     transform: translateX(10%) scale(1.22);
   }
 }
@@ -37,12 +39,11 @@ section > video[autoplay] + div + div {
 @media (max-width: 1023px) {
   section > video[autoplay] {
     object-position: center center !important;
+    background-position: center center;
     transform: scale(1.04);
   }
 }
 
-/* Do not let Tailwind's motion-reduce:hidden remove the hero media entirely.
-   The browser may still choose not to autoplay, but the video element remains visible. */
 @media (prefers-reduced-motion: reduce) {
   section > video[autoplay] {
     display: block !important;
