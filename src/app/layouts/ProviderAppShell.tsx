@@ -13,6 +13,7 @@ import { MobileBottomNav } from '../components/MobileBottomNav';
 import { useAsyncResource } from '../hooks/useAsyncResource';
 import { isSupabaseBackendEnabled } from '../lib/backendMode';
 import { getCurrentProviderOrganization } from '../services';
+import { PROVIDER_LOGO_KEY, useStoredProfileImage } from '../lib/profileMedia';
 
 const MORE_HREF = '/provider/more';
 const WORKERS_HREF = '/provider/workers';
@@ -44,6 +45,7 @@ function isBenchActive(pathname: string) {
 function isMoreActive(pathname: string) {
   return (
     pathname === '/provider/more' ||
+    pathname === '/provider/profile' ||
     pathname === '/provider/onboarding' ||
     pathname === '/provider/team' ||
     pathname === '/provider/referrals' ||
@@ -63,6 +65,7 @@ function isMoreActive(pathname: string) {
 
 function providerHeaderSubtitle(pathname: string, organizationName?: string | null) {
   if (pathname.startsWith('/provider/onboarding')) return 'Workspace setup';
+  if (pathname === '/provider/profile') return 'Organization profile';
   if (pathname === '/provider/sites/new') return 'Add care site';
   const name = organizationName?.trim();
   return name || 'Provider workspace';
@@ -75,6 +78,7 @@ function hideProviderBottomNav(pathname: string) {
 export function ProviderAppShell() {
   const { pathname } = useLocation();
   const { isAuthenticated } = useAuth();
+  const organizationLogo = useStoredProfileImage(PROVIDER_LOGO_KEY);
   const { data: providerOrg, loading: orgLoading } = useAsyncResource(
     () =>
       isAuthenticated && isSupabaseBackendEnabled()
@@ -102,16 +106,22 @@ export function ProviderAppShell() {
     <div className="provider-ui flex h-[100dvh] max-h-[100svh] min-h-dvh w-full max-w-full flex-col overflow-hidden bg-white text-[#10283D]">
       <header className="sticky top-0 z-40 shrink-0 border-b border-[#DDE7E8] bg-white/96 backdrop-blur">
         <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 pb-3 pt-[max(0.6rem,env(safe-area-inset-top))] sm:px-6">
-          <CovreBrandLogo
-            surface="light"
-            layout="mark"
-            width={36}
-            className="shrink-0"
-            imgClassName="h-9 w-9 max-h-9 object-contain"
-            alt={APP_NAME}
-          />
+          {organizationLogo ? (
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[#DDE7E8] bg-white">
+              <img src={organizationLogo} alt="Organization logo" className="h-full w-full object-contain p-1" />
+            </div>
+          ) : (
+            <CovreBrandLogo
+              surface="light"
+              layout="mark"
+              width={36}
+              className="shrink-0"
+              imgClassName="h-9 w-9 max-h-9 object-contain"
+              alt={APP_NAME}
+            />
+          )}
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-semibold text-[#13334F]">{APP_NAME}</div>
+            <div className="truncate text-sm font-semibold text-[#13334F]">{organizationName || APP_NAME}</div>
             <div className="truncate text-xs font-medium text-[#2F8E7A]">{headerSubtitle}</div>
           </div>
         </div>
