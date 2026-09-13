@@ -6,108 +6,49 @@ import type { CareSite } from '../../data/types';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 
 function SiteStatus({ status }: { status: CareSite['operationalStatus'] }) {
-  if (status === 'active') {
-    return <StatusBadge variant="covered">Active</StatusBadge>;
-  }
-  return <StatusBadge variant="pending">Needs Review</StatusBadge>;
-}
-
-function LoadingBlock() {
-  return (
-    <div className="mx-auto w-full min-w-0 max-w-full rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
-    </div>
-  );
-}
-
-function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="mx-auto w-full min-w-0 max-w-full rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm text-[#607583]">{message}</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A]"
-      >
-        Retry
-      </button>
-    </div>
-  );
+  return status === 'active' ? <StatusBadge variant="covered">Active</StatusBadge> : <StatusBadge variant="pending">Needs review</StatusBadge>;
 }
 
 export default function Sites() {
   const { data: careSites, error, loading, reload } = useAsyncResource(() => listProviderSites(), []);
 
   return (
-    <div className="min-h-full w-full min-w-0 max-w-full bg-[#F7FAFA] px-4 py-6">
-      <div className="mx-auto w-full min-w-0 max-w-full space-y-6">
-        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="break-words text-2xl font-semibold text-[#13334F]">Care sites</h1>
-            <p className="mt-1 text-sm text-[#607583]">
-              Manage locations, orientation details, and site-specific staffing requirements.
-            </p>
+    <div className="min-h-full bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-5 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Operations</p>
+              <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Care sites</h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">Locations, orientation details, preferred workers, and site-specific staffing rules.</p>
+            </div>
+            <Link to="/provider/sites/new" className="inline-flex min-h-11 shrink-0 items-center gap-2 text-sm font-semibold text-[#2F8E7A]"><Plus className="h-4 w-4" />Add site</Link>
           </div>
-          <Link
-            to="/provider/sites/new"
-            className="flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-[#DDE7E8] bg-white px-4 py-3 text-center text-sm font-semibold text-[#13334F] shadow-sm transition-colors hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] no-underline sm:w-auto"
-          >
-            <span className="inline-flex items-center justify-center gap-2">
-              <Plus className="h-4 w-4 text-[#53B59F]" aria-hidden />
-              Add Site
-            </span>
-          </Link>
-        </div>
+        </header>
 
-        {loading && <LoadingBlock />}
-        {error && <ErrorBlock message={error.message} onRetry={reload} />}
+        {loading && <p className="border-b border-[#DDE7E8] py-10 text-center text-sm text-[#607583]">Loading sites…</p>}
+        {error && <div className="border-b border-[#DDE7E8] py-10 text-center"><p className="text-sm text-[#607583]">{error.message}</p><button type="button" onClick={reload} className="mt-4 min-h-11 rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white">Try again</button></div>}
 
         {!loading && !error && careSites && careSites.length === 0 && (
-          <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center shadow-sm">
-            <p className="text-sm text-[#607583]">No care sites yet.</p>
-            <Link
-              to="/provider/sites/new"
-              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl bg-[#53B59F] px-4 py-3 text-sm font-semibold text-white no-underline hover:bg-[#2F8E7A]"
-            >
-              Add your first site
-            </Link>
-          </div>
+          <section className="py-12 text-center"><Building2 className="mx-auto h-8 w-8 text-[#53B59F]" /><p className="mt-3 font-semibold text-[#13334F]">No care sites yet.</p><Link to="/provider/sites/new" className="mt-4 inline-flex text-sm font-semibold text-[#2F8E7A]">Add your first site</Link></section>
         )}
 
         {!loading && !error && careSites && careSites.length > 0 && (
-          <div className="space-y-3">
-            {careSites.map(site => (
-              <Link
-                key={site.id}
-                to={`/provider/sites/${site.id}`}
-                className="flex min-w-0 max-w-full items-stretch gap-3 overflow-hidden rounded-2xl border border-[#DDE7E8] bg-white p-4 shadow-sm transition-colors hover:border-[#53B59F]/50 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] no-underline"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#E6F6F2] text-[#257665]">
-                  <Building2 className="h-6 w-6" aria-hidden />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <h2 className="font-semibold text-[#13334F]">{site.name}</h2>
-                      <p className="mt-0.5 text-sm text-[#607583]">{site.facilityType}</p>
-                    </div>
-                    <SiteStatus status={site.operationalStatus} />
+          <section className="pt-7">
+            <div className="border-t border-[#BFCED4]">
+              {careSites.map(site => (
+                <Link key={site.id} to={`/provider/sites/${site.id}`} className="flex items-center gap-4 border-b border-[#DDE7E8] py-5 no-underline transition-colors hover:bg-[#F7FAFA]">
+                  <Building2 className="h-5 w-5 shrink-0 text-[#2F8E7A]" aria-hidden />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2"><h2 className="text-lg font-semibold text-[#13334F]">{site.name}</h2><SiteStatus status={site.operationalStatus} /></div>
+                    <p className="mt-1 text-sm text-[#607583]">{site.facilityType}</p>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-[#607583]"><span><strong className="text-[#13334F]">{site.residents}</strong> residents</span><span className="inline-flex items-center gap-1"><Users className="h-3.5 w-3.5 text-[#53B59F]" /><strong className="text-[#13334F]">{site.preferredWorkerSlots}</strong> preferred workers</span></div>
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#607583]">
-                    <span>
-                      <span className="font-medium text-[#13334F]">{site.residents}</span> residents
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <Users className="h-3.5 w-3.5 shrink-0 text-[#53B59F]" aria-hidden />
-                      <span className="font-medium text-[#13334F]">{site.preferredWorkerSlots}</span>{' '}
-                      preferred workers
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className="mt-1 h-5 w-5 shrink-0 self-center text-[#B8C6CC]" aria-hidden />
-              </Link>
-            ))}
-          </div>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-[#B8C6CC]" />
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
       </div>
     </div>
