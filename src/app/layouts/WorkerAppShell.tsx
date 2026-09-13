@@ -3,14 +3,6 @@ import { Clock3, DollarSign, MessageSquareText, CalendarCheck2, UserRound } from
 import { cn } from '../components/ui/utils';
 import { MobileBottomNav } from '../components/MobileBottomNav';
 
-const WORKER_BOTTOM_NAV_PATHS = new Set([
-  '/worker/shifts',
-  '/worker/bookings',
-  '/worker/messages',
-  '/worker/pay',
-  '/worker/account',
-]);
-
 const workerNavTabs = [
   { to: '/worker/shifts', label: 'Shifts', Icon: Clock3 },
   { to: '/worker/bookings', label: 'Bookings', Icon: CalendarCheck2 },
@@ -20,7 +12,34 @@ const workerNavTabs = [
 ] as const;
 
 function showWorkerBottomNav(pathname: string): boolean {
-  return WORKER_BOTTOM_NAV_PATHS.has(pathname);
+  return (
+    pathname === '/worker/shifts' ||
+    pathname === '/worker/bookings' ||
+    pathname === '/worker/messages' ||
+    pathname === '/worker/pay' ||
+    pathname === '/worker/account' ||
+    pathname === '/worker/settings' ||
+    pathname === '/worker/profile' ||
+    pathname === '/worker/credentials' ||
+    pathname === '/worker/reputation' ||
+    pathname === '/worker/referrals' ||
+    pathname === '/worker/safety'
+  );
+}
+
+function isWorkerTabActive(tab: (typeof workerNavTabs)[number]['to'], pathname: string): boolean {
+  if (tab === '/worker/account') {
+    return [
+      '/worker/account',
+      '/worker/settings',
+      '/worker/profile',
+      '/worker/credentials',
+      '/worker/reputation',
+      '/worker/referrals',
+      '/worker/safety',
+    ].includes(pathname);
+  }
+  return pathname === tab;
 }
 
 export function WorkerAppShell() {
@@ -31,7 +50,7 @@ export function WorkerAppShell() {
     to,
     label,
     icon: Icon,
-    active: pathname === to,
+    active: isWorkerTabActive(to, pathname),
   }));
 
   return (
