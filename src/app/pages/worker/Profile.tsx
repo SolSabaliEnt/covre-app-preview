@@ -2,20 +2,21 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Camera, Check, MapPin, UserRound, X } from 'lucide-react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
-import { getCurrentWorkerProfile, saveCurrentWorkerProfile } from '../../services';
-import type { WorkerProfileDraft } from '../../services/types';
 import {
-  WORKER_PROFILE_PHOTO_KEY,
-  imageFileToDataUrl,
-  saveStoredProfileImage,
-  useStoredProfileImage,
-} from '../../lib/profileMedia';
+  getCurrentWorkerAvatar,
+  getCurrentWorkerProfile,
+  removeCurrentWorkerAvatar,
+  saveCurrentWorkerProfile,
+  uploadCurrentWorkerAvatar,
+} from '../../services';
+import type { WorkerProfileDraft } from '../../services/types';
 
 const roles = ['Caregiver', 'DSP', 'CNA', 'Medication Aide', 'LPN', 'RN', 'Behavioral Health Tech', 'Home Health Aide', 'Personal Care Aide'];
 const experienceLevels = ['New to care', '1–2 years', '3–5 years', '5+ years'];
 
 export default function WorkerProfile() {
-  const profilePhoto = useStoredProfileImage(WORKER_PROFILE_PHOTO_KEY);
+  const [profilePhoto, setProfilePhoto] = useState<string | undefined>();
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState('');
@@ -29,19 +30,23 @@ export default function WorkerProfile() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const res = await getCurrentWorkerProfile();
+      const [profileRes, avatarRes] = await Promise.all([
+        getCurrentWorkerProfile(),
+        getCurrentWorkerAvatar(),
+      ]);
       if (cancelled) return;
-      if (res.ok) {
-        setFullName(res.data.fullName ?? '');
-        setPhone(res.data.phone ?? '');
-        setCity(res.data.city ?? '');
-        setState(res.data.state ?? '');
-        setSelectedRoles(res.data.roles ?? []);
-        setExperienceLevel(res.data.experienceLevel ?? '');
-        setAvailability(res.data.availability ?? '');
+      if (profileRes.ok) {
+        setFullName(profileRes.data.fullName ?? '');
+        setPhone(profileRes.data.phone ?? '');
+        setCity(profileRes.data.city ?? '');
+        setState(profileRes.data.state ?? '');
+        setSelectedRoles(profileRes.data.roles ?? []);
+        setExperienceLevel(profileRes.data.experienceLevel ?? '');
+        setAvailability(profileRes.data.availability ?? '');
       } else {
-        toast.error(res.error.message);
+        toast.error(profileRes.error.message);
       }
+      if (avatarRes.ok) setProfilePhoto(avatarRes.data.url);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -54,14 +59,29 @@ export default function WorkerProfile() {
   };
 
   const handlePhoto = async (file?: File) => {
-    if (!file) return;
-    try {
-      const dataUrl = await imageFileToDataUrl(file);
-      saveStoredProfileImage(WORKER_PROFILE_PHOTO_KEY, dataUrl);
-      toast.success('Profile photo updated');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not use that photo.');
+    if (!file || mediaBusy) return;
+    setMediaBusy(true);
+    const result = await uploadCurrentWorkerAvatar(file);
+    setMediaBusy(false);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
     }
+    setProfilePhoto(result.data.url);
+    toast.success(result.data.message);
+  };
+
+  const handleRemovePhoto = async () => {
+    if (mediaBusy) return;
+    setMediaBusy(true);
+    const result = await removeCurrentWorkerAvatar();
+    setMediaBusy(false);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
+    setProfilePhoto(undefined);
+    toast.success(result.data.message);
   };
 
   const handleSave = async () => {
@@ -122,16 +142,17 @@ export default function WorkerProfile() {
               <h2 className="text-lg font-semibold text-[#13334F]">Profile photo</h2>
               <p className="mt-1 text-sm leading-5 text-[#607583]">Use a clear, recent headshot. This helps facilities recognize who is arriving for care.</p>
               <div className="mt-3 flex flex-wrap gap-3">
-                <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-[#13334F] px-4 text-sm font-semibold text-white hover:bg-[#0B243A]">
-                  <Camera className="h-4 w-4" aria-hidden /> {profilePhoto ? 'Change photo' : 'Add photo'}
-                  <input type="file" accept="image/*" className="sr-only" onChange={e => void handlePhoto(e.target.files?.[0])} />
+                <label className={`inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#13334F] px-4 text-sm font-semibold text-white hover:bg-[#0B243A] ${mediaBusy ? 'cursor-wait opacity-60' : 'cursor-pointer'}`}>
+                  <Camera className="h-4 w-4" aria-hidden /> {mediaBusy ? 'Uploading…' : profilePhoto ? 'Change photo' : 'Add photo'}
+                  <input disabled={mediaBusy} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={e => void handlePhoto(e.target.files?.[0])} />
                 </label>
                 {profilePhoto ? (
-                  <button type="button" onClick={() => saveStoredProfileImage(WORKER_PROFILE_PHOTO_KEY, null)} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#A93636]">
+                  <button disabled={mediaBusy} type="button" onClick={() => void handleRemovePhoto()} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#A93636] disabled:opacity-60">
                     <X className="h-4 w-4" aria-hidden /> Remove
                   </button>
                 ) : null}
               </div>
+              <p className="mt-2 text-xs text-[#9AAAB3]">JPG, PNG, or WebP · 3 MB max</p>
             </div>
           </div>
         </section>
