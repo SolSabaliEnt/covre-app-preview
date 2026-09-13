@@ -6,10 +6,7 @@ import { getProviderBench, inviteWorkerToShift } from '../../services';
 import { useProviderAction } from '../../hooks/useProviderAction';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import type { ProviderBenchWorker } from '../../services/types';
-
-function workerInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('');
-}
+import { ProviderWorkerAvatar } from '../../components/ProviderWorkerAvatar';
 
 function LoadingBlock() {
   return <div className="border-y border-[#DDE7E8] py-12 text-center text-sm text-[#607583]">Loading bench…</div>;
@@ -37,15 +34,7 @@ function BenchEmptyState({ message }: { message?: string }) {
   );
 }
 
-function WorkerRow({
-  worker,
-  isSupabase,
-  isSaved,
-  sectionTitle,
-  invited,
-  isPending,
-  onInvite,
-}: {
+function WorkerRow({ worker, isSupabase, isSaved, sectionTitle, invited, isPending, onInvite }: {
   worker: ProviderBenchWorker;
   isSupabase: boolean;
   isSaved: boolean;
@@ -61,7 +50,7 @@ function WorkerRow({
   return (
     <article className="border-b border-[#DDE7E8] py-5">
       <div className="flex items-start gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#E6F6F2] font-semibold text-[#257665]">{workerInitials(worker.name)}</div>
+        <ProviderWorkerAvatar workerId={worker.id} name={worker.name} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <Link to={`/provider/workers/${worker.id}`} className="font-semibold text-[#13334F] no-underline hover:text-[#2F8E7A]">{worker.name}</Link>
@@ -69,9 +58,7 @@ function WorkerRow({
           </div>
           <p className="mt-1 text-sm text-[#607583]">{role}</p>
           {isSupabase ? (
-            <p className="mt-2 text-xs leading-5 text-[#9AAAB3]">
-              {approvedCount > 0 ? `${approvedCount} approved ${approvedCount === 1 ? 'shift' : 'shifts'} together${worker.lastWorkedAt ? ` · Last ${worker.lastWorkedAt}` : ''}` : 'Saved intentionally · no approved work together yet'}
-            </p>
+            <p className="mt-2 text-xs leading-5 text-[#9AAAB3]">{approvedCount > 0 ? `${approvedCount} approved ${approvedCount === 1 ? 'shift' : 'shifts'} together${worker.lastWorkedAt ? ` · Last ${worker.lastWorkedAt}` : ''}` : 'Saved intentionally · no approved work together yet'}</p>
           ) : (
             <div className="mt-3 flex gap-5 text-sm text-[#607583]">
               <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4" /> <strong className="text-[#13334F]">{score}</strong> score</span>
@@ -80,16 +67,9 @@ function WorkerRow({
           )}
         </div>
       </div>
-
       <div className="mt-4 flex items-center justify-between gap-4 pl-15">
-        <Link to={`/provider/workers/${worker.id}`} className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#2F8E7A] no-underline">
-          {approvedCount > 0 ? 'View shared history' : 'View profile'} <ArrowRight className="h-4 w-4" />
-        </Link>
-        {!isSupabase ? (
-          <button type="button" disabled={invited || isPending(`bench-invite-${sectionTitle}-${worker.id}`)} onClick={() => onInvite(worker, sectionTitle)} className="min-h-10 text-sm font-semibold text-[#13334F] disabled:opacity-50">
-            {invited ? 'Invited' : 'Invite to shift'}
-          </button>
-        ) : null}
+        <Link to={`/provider/workers/${worker.id}`} className="inline-flex min-h-10 items-center gap-1.5 text-sm font-semibold text-[#2F8E7A] no-underline">{approvedCount > 0 ? 'View shared history' : 'View profile'} <ArrowRight className="h-4 w-4" /></Link>
+        {!isSupabase ? <button type="button" disabled={invited || isPending(`bench-invite-${sectionTitle}-${worker.id}`)} onClick={() => onInvite(worker, sectionTitle)} className="min-h-10 text-sm font-semibold text-[#13334F] disabled:opacity-50">{invited ? 'Invited' : 'Invite to shift'}</button> : null}
       </div>
     </article>
   );
@@ -102,10 +82,8 @@ export default function Bench() {
 
   const handleMockInvite = async (worker: ProviderBenchWorker, sectionTitle: string) => {
     const r = await run(`bench-invite-${sectionTitle}-${worker.id}`, () => inviteWorkerToShift(worker.id));
-    if (r.ok) {
-      toast.success(r.data.message);
-      setInvited(prev => ({ ...prev, [worker.id]: true }));
-    } else toast.error(r.error.message);
+    if (r.ok) { toast.success(r.data.message); setInvited(prev => ({ ...prev, [worker.id]: true })); }
+    else toast.error(r.error.message);
   };
 
   if (loading) return <LoadingBlock />;
@@ -120,58 +98,14 @@ export default function Bench() {
       <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-5 sm:px-6">
         <header className="border-b border-[#DDE7E8] pb-5">
           <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Preferred people</p>
-          <div className="mt-2 flex items-end justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Covre Bench</h1>
-              <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">Keep trusted workers close without confusing preference with work history.</p>
-            </div>
-            <div className="shrink-0 text-right">
-              <p className="text-2xl font-semibold text-[#13334F]">{totalWorkers}</p>
-              <p className="text-xs text-[#607583]">workers</p>
-            </div>
-          </div>
+          <div className="mt-2 flex items-end justify-between gap-4"><div><h1 className="text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Covre Bench</h1><p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">Keep trusted workers close without confusing preference with work history.</p></div><div className="shrink-0 text-right"><p className="text-2xl font-semibold text-[#13334F]">{totalWorkers}</p><p className="text-xs text-[#607583]">workers</p></div></div>
         </header>
-
-        {isSupabase ? (
-          <section className="border-b border-[#DDE7E8] py-5">
-            <div className="flex items-start gap-3">
-              <Bookmark className="mt-0.5 h-5 w-5 shrink-0 text-[#2F8E7A]" />
-              <div>
-                <p className="font-semibold text-[#13334F]">Bench = deliberate provider preference.</p>
-                <p className="mt-1 text-sm leading-6 text-[#607583]">Approved work can make someone familiar without saving them here. Worker return preferences stay private.</p>
-              </div>
-            </div>
-          </section>
-        ) : null}
-
+        {isSupabase ? <section className="border-b border-[#DDE7E8] py-5"><div className="flex items-start gap-3"><Bookmark className="mt-0.5 h-5 w-5 shrink-0 text-[#2F8E7A]" /><div><p className="font-semibold text-[#13334F]">Bench = deliberate provider preference.</p><p className="mt-1 text-sm leading-6 text-[#607583]">Approved work can make someone familiar without saving them here. Worker return preferences stay private.</p></div></div></section> : null}
         {isSupabase && !hasWorkers ? <BenchEmptyState message={data.message} /> : null}
-
         {data.sections.map(section => section.workers.length === 0 ? null : (
           <section key={section.title} className="pt-7">
-            <div className="flex items-end justify-between gap-4 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  {isSupabase && section.title === 'Saved to your Bench' ? <Bookmark className="h-4 w-4 text-[#2F8E7A]" /> : isSupabase ? <History className="h-4 w-4 text-[#607583]" /> : null}
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">{section.title}</p>
-                </div>
-                {isSupabase ? <p className="mt-1 text-sm text-[#607583]">{section.title === 'Saved to your Bench' ? 'Explicitly saved by your organization.' : 'Known through approved work, not yet saved.'}</p> : null}
-              </div>
-              <span className="text-xs font-semibold text-[#7A8D98]">{section.workers.length}</span>
-            </div>
-            <div className="border-t border-[#BFCED4]">
-              {section.workers.map(worker => (
-                <WorkerRow
-                  key={`${section.title}-${worker.id}`}
-                  worker={worker}
-                  isSupabase={isSupabase}
-                  isSaved={section.title === 'Saved to your Bench'}
-                  sectionTitle={section.title}
-                  invited={Boolean(invited[worker.id])}
-                  isPending={isPending}
-                  onInvite={handleMockInvite}
-                />
-              ))}
-            </div>
+            <div className="flex items-end justify-between gap-4 pb-3"><div><div className="flex items-center gap-2">{isSupabase && section.title === 'Saved to your Bench' ? <Bookmark className="h-4 w-4 text-[#2F8E7A]" /> : isSupabase ? <History className="h-4 w-4 text-[#607583]" /> : null}<p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">{section.title}</p></div>{isSupabase ? <p className="mt-1 text-sm text-[#607583]">{section.title === 'Saved to your Bench' ? 'Explicitly saved by your organization.' : 'Known through approved work, not yet saved.'}</p> : null}</div><span className="text-xs font-semibold text-[#7A8D98]">{section.workers.length}</span></div>
+            <div className="border-t border-[#BFCED4]">{section.workers.map(worker => <WorkerRow key={`${section.title}-${worker.id}`} worker={worker} isSupabase={isSupabase} isSaved={section.title === 'Saved to your Bench'} sectionTitle={section.title} invited={Boolean(invited[worker.id])} isPending={isPending} onInvite={handleMockInvite} />)}</div>
           </section>
         ))}
       </div>
