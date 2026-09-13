@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Check, ShieldAlert } from 'lucide-react';
 import { toast } from 'sonner';
 import { submitSafetyReport } from '../../services';
 
@@ -28,11 +28,7 @@ export default function SafetyReport() {
       return;
     }
     setSubmitting(true);
-    const result = await submitSafetyReport({
-      issueType: issueType as string,
-      details,
-      urgent,
-    });
+    const result = await submitSafetyReport({ issueType: issueType as string, details, urgent });
     setSubmitting(false);
     if (!result.ok) {
       toast.error(result.error.message);
@@ -44,104 +40,79 @@ export default function SafetyReport() {
 
   if (submitted) {
     return (
-      <div className="min-h-[100svh] w-full max-w-full bg-[#F7FAFA] px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6 text-[#10283D]">
-        <header className="mb-6">
-          <Link
-            to="/worker/active-shift"
-            className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-[#53B59F] hover:text-[#2F8E7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
-          >
-            <ArrowLeft className="h-4 w-4" aria-hidden />
-            Back to active shift
+      <div className="min-h-[100svh] bg-white text-[#10283D]">
+        <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-6 sm:px-6">
+          <Link to="/worker/active-shift" className="inline-flex items-center gap-2 text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Back to active shift
           </Link>
-          <h1 className="text-2xl font-semibold text-[#13334F]">Report received</h1>
-          <p className="mt-2 text-[#607583]">
-            Thanks — Covre has recorded your safety report{urgent ? ' and flagged it for urgent follow-up' : ''}.
-          </p>
-        </header>
-        <Link
-          to="/worker/active-shift"
-          className="inline-flex w-full items-center justify-center rounded-xl bg-[#53B59F] px-6 py-4 font-medium text-white transition-colors hover:bg-[#2F8E7A] sm:w-auto"
-        >
-          Return to active shift
-        </Link>
+          <section className="border-b border-[#DDE7E8] py-10">
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]"><Check className="h-5 w-5" aria-hidden /></div>
+            <h1 className="mt-5 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Report received.</h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-[#607583]">Covre recorded your report{urgent ? ' and flagged it for urgent follow-up' : ''}. You can return to your shift while the report stays attached to this work record.</p>
+          </section>
+          <Link to="/worker/active-shift" className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#53B59F] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#2F8E7A] sm:w-auto">
+            Return to active shift
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[100svh] w-full max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 pb-[max(2rem,env(safe-area-inset-bottom))] pt-6 text-[#10283D]">
-      <header className="mb-6">
-        <Link
-          to="/worker/active-shift"
-          className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-[#53B59F] hover:text-[#2F8E7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden />
-          Back to active shift
-        </Link>
-        <h1 className="text-2xl font-semibold text-[#13334F]">Report a safety issue</h1>
-        <p className="mt-2 text-[#607583]">
-          Tell Covre what happened so we can help protect you and document the shift.
-        </p>
-      </header>
+    <div className="min-h-[100svh] bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-6 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <Link to="/worker/active-shift" className="inline-flex items-center gap-2 text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">
+            <ArrowLeft className="h-4 w-4" aria-hidden /> Back to active shift
+          </Link>
+          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.15em] text-[#A93636]">Safety & support</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Tell us what happened.</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">Document the issue clearly. Covre keeps the report with the shift record so support and operations have the right context.</p>
+        </header>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <fieldset className="space-y-2">
-          <legend className="sr-only">Issue type</legend>
-          <p id="issue-type-label" className="text-sm font-medium text-[#13334F]">
-            Issue type
-          </p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2" role="group" aria-labelledby="issue-type-label">
-            {ISSUE_TYPES.map(type => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setIssueType(type)}
-                className={`rounded-2xl border-2 px-4 py-4 text-left text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] ${
-                  issueType === type
-                    ? 'border-[#53B59F] bg-white text-[#13334F] shadow-sm'
-                    : 'border-[#DDE7E8] bg-white text-[#607583] hover:border-[#B8C6CC]'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
+        <form onSubmit={handleSubmit} className="pb-4">
+          <fieldset className="border-b border-[#DDE7E8] py-7">
+            <legend className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">What kind of issue?</legend>
+            <div className="mt-4 border-t border-[#BFCED4]" role="group" aria-label="Issue type">
+              {ISSUE_TYPES.map(type => {
+                const selected = issueType === type;
+                return (
+                  <button key={type} type="button" onClick={() => setIssueType(type)} className="flex min-h-14 w-full items-center justify-between gap-4 border-b border-[#DDE7E8] py-3.5 text-left transition-colors hover:bg-[#F7FAFA]">
+                    <span className={selected ? 'font-semibold text-[#13334F]' : 'font-medium text-[#466170]'}>{type}</span>
+                    <span className={selected ? 'flex h-6 w-6 items-center justify-center rounded-full bg-[#53B59F] text-white' : 'h-6 w-6 rounded-full border border-[#BFCED4]'} aria-hidden>
+                      {selected ? <Check className="h-4 w-4" /> : null}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          <section className="border-b border-[#DDE7E8] py-7">
+            <label htmlFor="safety-details" className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Details</label>
+            <textarea id="safety-details" value={details} onChange={e => setDetails(e.target.value)} rows={6} placeholder="What happened? Include times, people involved, and anything support should know." className="mt-4 w-full resize-y border-b border-[#BFCED4] bg-transparent px-0 py-2 text-sm leading-6 text-[#13334F] outline-none placeholder:text-[#A5B3BA] focus:border-[#53B59F]" />
+          </section>
+
+          <section className="border-b border-[#DDE7E8] py-7">
+            <button type="button" onClick={() => setUrgent(value => !value)} className="flex w-full items-start gap-3 text-left">
+              <span className={urgent ? 'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#D94A4A] text-white' : 'mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-[#D8A7A7] text-[#A93636]'}>
+                {urgent ? <Check className="h-4 w-4" aria-hidden /> : <AlertTriangle className="h-3.5 w-3.5" aria-hidden />}
+              </span>
+              <span>
+                <span className="block font-semibold text-[#13334F]">I need urgent follow-up.</span>
+                <span className="mt-1 block text-sm leading-6 text-[#607583]">Use this when you need Covre support to contact you quickly. If anyone is in immediate danger, contact emergency services first.</span>
+              </span>
+            </button>
+          </section>
+
+          <div className="pt-6">
+            <button type="submit" disabled={submitting} className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#13334F] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] disabled:opacity-60">
+              <ShieldAlert className="h-4 w-4" aria-hidden /> {submitting ? 'Submitting…' : 'Submit report'}
+            </button>
+            <p className="mt-3 text-center text-xs leading-5 text-[#9AAAB3]">Submitting creates a safety record tied to this shift.</p>
           </div>
-        </fieldset>
-
-        <div>
-          <label htmlFor="safety-details" className="text-sm font-medium text-[#13334F]">
-            Details
-          </label>
-          <textarea
-            id="safety-details"
-            value={details}
-            onChange={e => setDetails(e.target.value)}
-            rows={5}
-            placeholder="What happened? Include times, people involved, and anything we should know."
-            className="mt-2 w-full max-w-full rounded-xl border border-[#DDE7E8] bg-white px-4 py-3 text-[#10283D] placeholder:text-[#9AAAB3] focus:border-[#53B59F] focus:outline-none focus:ring-2 focus:ring-[#53B59F]/30"
-          />
-        </div>
-
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#DDE7E8] bg-white p-4">
-          <input
-            type="checkbox"
-            checked={urgent}
-            onChange={e => setUrgent(e.target.checked)}
-            className="mt-1 h-4 w-4 shrink-0 rounded border-[#DDE7E8] text-[#53B59F] focus:ring-[#53B59F]"
-          />
-          <span className="text-sm text-[#13334F]">
-            I need Covre support to contact me urgently.
-          </span>
-        </label>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-xl bg-[#13334F] px-6 py-4 font-medium text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13334F] disabled:opacity-60"
-        >
-          {submitting ? 'Submitting…' : 'Submit report'}
-        </button>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
