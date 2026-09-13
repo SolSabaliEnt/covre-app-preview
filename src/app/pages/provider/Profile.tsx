@@ -2,20 +2,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Building2, Camera, CheckCircle2, MapPin, Users, X } from 'lucide-react';
 import { Link } from 'react-router';
 import { toast } from 'sonner';
-import { getProviderSettingsSummary } from '../../services';
+import {
+  getCurrentProviderLogo,
+  getProviderSettingsSummary,
+  removeCurrentProviderLogo,
+  uploadCurrentProviderLogo,
+} from '../../services';
 import type { ProviderSettingsSummary } from '../../services/types';
 import {
-  PROVIDER_LOGO_KEY,
   PROVIDER_PROFILE_ABOUT_KEY,
   getStoredProfileText,
-  imageFileToDataUrl,
-  saveStoredProfileImage,
   saveStoredProfileText,
-  useStoredProfileImage,
 } from '../../lib/profileMedia';
 
 export default function ProviderProfile() {
-  const logo = useStoredProfileImage(PROVIDER_LOGO_KEY);
+  const [logo, setLogo] = useState<string | undefined>();
+  const [mediaBusy, setMediaBusy] = useState(false);
   const [about, setAbout] = useState(() => getStoredProfileText(PROVIDER_PROFILE_ABOUT_KEY));
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<ProviderSettingsSummary | null>(null);
@@ -23,10 +25,14 @@ export default function ProviderProfile() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const res = await getProviderSettingsSummary();
+      const [summaryRes, logoRes] = await Promise.all([
+        getProviderSettingsSummary(),
+        getCurrentProviderLogo(),
+      ]);
       if (cancelled) return;
-      if (res.ok) setSummary(res.data);
-      else toast.error(res.error.message);
+      if (summaryRes.ok) setSummary(summaryRes.data);
+      else toast.error(summaryRes.error.message);
+      if (logoRes.ok) setLogo(logoRes.data.url);
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -38,14 +44,29 @@ export default function ProviderProfile() {
   }, [summary?.organizationName]);
 
   const handleLogo = async (file?: File) => {
-    if (!file) return;
-    try {
-      const dataUrl = await imageFileToDataUrl(file);
-      saveStoredProfileImage(PROVIDER_LOGO_KEY, dataUrl);
-      toast.success('Organization logo updated');
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not use that logo.');
+    if (!file || mediaBusy) return;
+    setMediaBusy(true);
+    const result = await uploadCurrentProviderLogo(file);
+    setMediaBusy(false);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
     }
+    setLogo(result.data.url);
+    toast.success(result.data.message);
+  };
+
+  const handleRemoveLogo = async () => {
+    if (mediaBusy) return;
+    setMediaBusy(true);
+    const result = await removeCurrentProviderLogo();
+    setMediaBusy(false);
+    if (!result.ok) {
+      toast.error(result.error.message);
+      return;
+    }
+    setLogo(undefined);
+    toast.success(result.data.message);
   };
 
   const saveAbout = () => {
@@ -78,12 +99,13 @@ export default function ProviderProfile() {
               </div>
               <p className="mt-1 text-sm leading-5 text-[#607583]">Add a logo if you have one. Covre still works cleanly without it.</p>
               <div className="mt-3 flex flex-wrap gap-3">
-                <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl bg-[#13334F] px-4 text-sm font-semibold text-white hover:bg-[#0B243A]">
-                  <Camera className="h-4 w-4" aria-hidden /> {logo ? 'Change logo' : 'Add logo'}
-                  <input type="file" accept="image/*" className="sr-only" onChange={e => void handleLogo(e.target.files?.[0])} />
+                <label className={`inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#13334F] px-4 text-sm font-semibold text-white hover:bg-[#0B243A] ${mediaBusy ? 'cursor-wait opacity-60' : 'cursor-pointer'}`}>
+                  <Camera className="h-4 w-4" aria-hidden /> {mediaBusy ? 'Uploading…' : logo ? 'Change logo' : 'Add logo'}
+                  <input disabled={mediaBusy} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={e => void handleLogo(e.target.files?.[0])} />
                 </label>
-                {logo ? <button type="button" onClick={() => saveStoredProfileImage(PROVIDER_LOGO_KEY, null)} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#A93636]"><X className="h-4 w-4" aria-hidden /> Remove</button> : null}
+                {logo ? <button disabled={mediaBusy} type="button" onClick={() => void handleRemoveLogo()} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#A93636] disabled:opacity-60"><X className="h-4 w-4" aria-hidden /> Remove</button> : null}
               </div>
+              <p className="mt-2 text-xs text-[#9AAAB3]">JPG, PNG, or WebP · 3 MB max</p>
             </div>
           </div>
         </section>
