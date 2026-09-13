@@ -1,3 +1,45 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+/* Landing hero video tuning: keep the subject visible while preserving text contrast. */
+video[src="/covre-header-background.mp4"] {
+  display: block !important;
+  filter: saturate(0.92) contrast(1.04);
+  transform: scale(1.04);
+  transform-origin: center center;
+}
+
+video[src="/covre-header-background.mp4"] + div {
+  background-color: rgba(11, 36, 58, 0.24) !important;
+}
+
+video[src="/covre-header-background.mp4"] + div + div {
+  background-image: linear-gradient(
+    90deg,
+    rgba(11, 36, 58, 0.84) 0%,
+    rgba(11, 36, 58, 0.70) 34%,
+    rgba(11, 36, 58, 0.36) 62%,
+    rgba(11, 36, 58, 0.10) 100%
+  ) !important;
+}
+
+@media (min-width: 1024px) {
+  video[src="/covre-header-background.mp4"] {
+    object-position: center center !important;
+    transform: translateX(12%) scale(1.30);
+  }
+}
+
+@media (max-width: 1023px) {
+  video[src="/covre-header-background.mp4"] {
+    object-position: center center !important;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  video[src="/covre-header-background.mp4"] {
+    display: block !important;
+  }
+}
