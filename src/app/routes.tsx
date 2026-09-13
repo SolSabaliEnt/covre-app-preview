@@ -21,6 +21,7 @@ import WorkerShiftFeed from './pages/worker/ShiftFeed';
 import WorkerBookings from './pages/worker/Bookings';
 import WorkerMessages from './pages/worker/Messages';
 import WorkerAccount from './pages/worker/Account';
+import WorkerSettings from './pages/worker/Settings';
 import WorkerShiftDetail from './pages/worker/ShiftDetail';
 import WorkerActiveShift from './pages/worker/ActiveShift';
 import WorkerPay from './pages/worker/Pay';
@@ -73,6 +74,7 @@ const workerProtectedRoute = {
     { path: 'bookings', Component: WorkerBookings },
     { path: 'messages', Component: WorkerMessages },
     { path: 'account', Component: WorkerAccount },
+    { path: 'settings', Component: WorkerSettings },
     { path: 'shift/:id', Component: WorkerShiftDetail },
     { path: 'active-shift', Component: WorkerActiveShift },
     { path: 'pay', Component: WorkerPay },
@@ -130,6 +132,7 @@ const adminWorkerPreviewRoutes = [
   { path: 'full-app/worker/safety', element: <AdminPreviewFrame audience="Worker"><WorkerSafetyReport /></AdminPreviewFrame> },
   { path: 'full-app/worker/referrals', element: <AdminPreviewFrame audience="Worker"><WorkerReferrals /></AdminPreviewFrame> },
   { path: 'full-app/worker/account', element: <AdminPreviewFrame audience="Worker"><WorkerAccount /></AdminPreviewFrame> },
+  { path: 'full-app/worker/settings', element: <AdminPreviewFrame audience="Worker"><WorkerSettings /></AdminPreviewFrame> },
 ];
 
 const adminProviderPreviewRoutes = [
