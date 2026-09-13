@@ -28,6 +28,62 @@ section > video[autoplay] + div + div {
   ) !important;
 }
 
+/* Worker cross-screen polish: consistent touch targets, typography, keyboard
+   focus, and mobile tap behavior without changing individual page hierarchy. */
+.worker-ui {
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+.worker-ui button,
+.worker-ui a,
+.worker-ui input,
+.worker-ui select,
+.worker-ui textarea {
+  font: inherit;
+}
+
+.worker-ui button,
+.worker-ui a {
+  touch-action: manipulation;
+}
+
+.worker-ui button:focus-visible,
+.worker-ui a:focus-visible,
+.worker-ui input:focus-visible,
+.worker-ui select:focus-visible,
+.worker-ui textarea:focus-visible {
+  outline: 2px solid #53B59F;
+  outline-offset: 2px;
+}
+
+.worker-ui h1,
+.worker-ui h2,
+.worker-ui h3 {
+  text-wrap: balance;
+}
+
+.worker-ui p {
+  text-wrap: pretty;
+}
+
+.worker-ui input,
+.worker-ui select,
+.worker-ui textarea {
+  font-size: 16px;
+}
+
+@media (max-width: 639px) {
+  .worker-ui button,
+  .worker-ui a {
+    min-height: 44px;
+  }
+
+  .worker-ui [role='tab'] {
+    min-height: 44px;
+  }
+}
+
 @media (min-width: 1024px) {
   section > video[autoplay] {
     object-position: center center !important;
@@ -47,5 +103,14 @@ section > video[autoplay] + div + div {
 @media (prefers-reduced-motion: reduce) {
   section > video[autoplay] {
     display: block !important;
+  }
+
+  .worker-ui *,
+  .worker-ui *::before,
+  .worker-ui *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
