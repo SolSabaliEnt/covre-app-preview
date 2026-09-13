@@ -2,346 +2,82 @@ import { useState } from 'react';
 import { StatusBadge } from '../../components/StatusBadge';
 import { ClipboardList, Download } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  generateProviderCompliancePacketFromApprovedTimesheet,
-  listCompliancePackets,
-  type CompliancePacketRow,
-} from '../../services';
+import { generateProviderCompliancePacketFromApprovedTimesheet, listCompliancePackets, type CompliancePacketRow } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import { useProviderAction } from '../../hooks/useProviderAction';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
 
 function PacketBadge({ packet }: { packet: CompliancePacketRow }) {
-  if (packet.isSimulated) {
-    return (
-      <StatusBadge variant="pending">{packet.statusLabel ?? 'Pending booking'}</StatusBadge>
-    );
-  }
-  if (packet.hasGeneratedSnapshot) {
-    return <StatusBadge variant="covered">Snapshot generated</StatusBadge>;
-  }
-  if (packet.canGenerateSnapshot) {
-    return <StatusBadge variant="pending">Ready for packet</StatusBadge>;
-  }
-  if (packet.packetStatus === 'ready') {
-    return <StatusBadge variant="covered">Ready</StatusBadge>;
-  }
-  if (packet.packetStatus === 'review') {
-    return <StatusBadge variant="pending">Needs Review</StatusBadge>;
-  }
-  return <StatusBadge variant="missing">Missing Signature</StatusBadge>;
+  if (packet.isSimulated) return <StatusBadge variant="pending">{packet.statusLabel ?? 'Pending booking'}</StatusBadge>;
+  if (packet.hasGeneratedSnapshot) return <StatusBadge variant="covered">Snapshot generated</StatusBadge>;
+  if (packet.canGenerateSnapshot) return <StatusBadge variant="pending">Ready for packet</StatusBadge>;
+  if (packet.packetStatus === 'ready') return <StatusBadge variant="covered">Ready</StatusBadge>;
+  if (packet.packetStatus === 'review') return <StatusBadge variant="pending">Needs review</StatusBadge>;
+  return <StatusBadge variant="missing">Missing signature</StatusBadge>;
 }
 
-function LoadingBlock() {
+function PacketRow({ packet, onGenerate, busy, mockQueued }: { packet: CompliancePacketRow; onGenerate: () => void; busy: boolean; mockQueued?: boolean }) {
   return (
-    <div className="mx-auto w-full min-w-0 max-w-full rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
-    </div>
-  );
-}
-
-function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="mx-auto w-full min-w-0 max-w-full rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm text-[#607583]">{message}</p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A]"
-      >
-        Retry
-      </button>
-    </div>
-  );
-}
-
-function EmptyBlock() {
-  return (
-    <div className="mx-auto w-full min-w-0 max-w-full rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-      <p className="text-center text-sm font-medium text-[#13334F]">No shifts yet</p>
-      <p className="mt-2 text-center text-sm text-[#607583]">
-        Post a shift to see compliance readiness rows here. Full packets require bookings,
-        credentials, and timesheets.
-      </p>
-    </div>
-  );
-}
-
-function MockComplianceView() {
-  const { data: compliancePackets, error, loading, reload } = useAsyncResource(
-    () => listCompliancePackets(),
-    [],
-  );
-  const [queuedIds, setQueuedIds] = useState<Set<string>>(() => new Set());
-
-  return (
-    <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 py-6 pb-8">
-      <div className="mx-auto w-full min-w-0 max-w-full space-y-6">
-        <div className="min-w-0">
-          <h1 className="break-words text-2xl font-semibold text-[#13334F]">Compliance packets</h1>
-          <p className="mt-1 text-sm text-[#607583]">
-            Keep shift records, credentials, approvals, and incident notes audit-ready.
-          </p>
-        </div>
-
-        {loading && <LoadingBlock />}
-        {error && <ErrorBlock message={error.message} onRetry={reload} />}
-
-        {!loading && !error && compliancePackets && compliancePackets.length === 0 && (
-          <EmptyBlock />
-        )}
-
-        {!loading && !error && compliancePackets && compliancePackets.length > 0 && (
-          <div className="space-y-4">
-            {compliancePackets.map(packet => (
-              <article
-                key={packet.id}
-                className="overflow-hidden rounded-2xl border border-[#DDE7E8] bg-white p-4 shadow-sm"
-              >
-                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E6F6F2] text-[#257665]">
-                      <ClipboardList className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div className="min-w-0">
-                      <h2 className="font-semibold text-[#13334F]">
-                        {packet.shiftRoleTitle} — {packet.siteName}
-                      </h2>
-                      <p className="mt-0.5 text-sm text-[#607583]">{packet.shiftWhen}</p>
-                      {packet.isSimulated && (
-                        <p className="mt-1 text-xs text-[#9AAAB3]">Simulated readiness · not a generated packet</p>
-                      )}
-                    </div>
-                  </div>
-                  <PacketBadge packet={packet} />
-                </div>
-
-                <dl className="space-y-2 text-sm">
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Worker</dt>
-                    <dd className="text-[#10283D]">{packet.workerName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Site</dt>
-                    <dd className="text-[#10283D]">{packet.siteName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">
-                      Credentials active at shift time
-                    </dt>
-                    <dd className="text-[#10283D]">{packet.credentialsAtShift}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Clock in / out</dt>
-                    <dd className="text-[#10283D]">{packet.clockSummary}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Approval status</dt>
-                    <dd className="text-[#10283D]">{packet.approvalLine}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Incident notes</dt>
-                    <dd className="text-[#10283D]">{packet.incidentNotes}</dd>
-                  </div>
-                  {packet.isSimulated && packet.missingItems && packet.missingItems.length > 0 && (
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">
-                        Required before packet
-                      </dt>
-                      <dd className="text-[#10283D]">
-                        <ul className="mt-1 list-inside list-disc space-y-0.5">
-                          {packet.missingItems.map(item => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-
-                <button
-                  type="button"
-                  disabled={queuedIds.has(packet.id)}
-                  onClick={() => {
-                    if (packet.isSimulated) {
-                      toast.message(
-                        'Compliance packet generation will be connected after bookings, credentials, and timesheets are wired.',
-                      );
-                    } else {
-                      toast.success('Compliance packet download queued');
-                    }
-                    setQueuedIds(prev => new Set(prev).add(packet.id));
-                  }}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#13334F] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <Download className="h-4 w-4 shrink-0" aria-hidden />
-                  {queuedIds.has(packet.id)
-                    ? 'Queued'
-                    : packet.isSimulated
-                      ? 'Queue packet'
-                      : 'Download Packet'}
-                </button>
-              </article>
-            ))}
+    <article className="border-b border-[#DDE7E8] py-5">
+      <div className="flex items-start gap-3">
+        <ClipboardList className="mt-0.5 h-5 w-5 shrink-0 text-[#2F8E7A]" aria-hidden />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div><h2 className="font-semibold text-[#13334F]">{packet.shiftRoleTitle} — {packet.siteName}</h2><p className="mt-1 text-sm text-[#607583]">{packet.shiftWhen}</p></div>
+            <PacketBadge packet={packet} />
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-function SupabaseComplianceView() {
-  const { run, isPending } = useProviderAction();
-  const { data: compliancePackets, error, loading, reload } = useAsyncResource(
-    () => listCompliancePackets(),
-    [],
-  );
+          <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+            <div><dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#7A8D98]">Worker</dt><dd className="mt-1 text-[#13334F]">{packet.workerName}</dd></div>
+            <div><dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#7A8D98]">Clock in / out</dt><dd className="mt-1 text-[#13334F]">{packet.clockSummary}</dd></div>
+            <div><dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#7A8D98]">Credentials at shift time</dt><dd className="mt-1 text-[#13334F]">{packet.credentialsAtShift}</dd></div>
+            <div><dt className="text-xs font-semibold uppercase tracking-[0.1em] text-[#7A8D98]">Approval</dt><dd className="mt-1 text-[#13334F]">{packet.approvalLine}</dd></div>
+          </dl>
 
-  return (
-    <div className="min-h-full w-full min-w-0 max-w-full overflow-x-hidden bg-[#F7FAFA] px-4 py-6 pb-8">
-      <div className="mx-auto w-full min-w-0 max-w-full space-y-6">
-        <div className="min-w-0">
-          <h1 className="break-words text-2xl font-semibold text-[#13334F]">Compliance packets</h1>
-          <p className="mt-1 text-sm text-[#607583]">
-            Compliance readiness and snapshot records from approved timesheets.
-          </p>
-          <p className="mt-3 rounded-xl border border-[#DDE7E8] bg-white px-4 py-3 text-sm leading-relaxed text-[#607583]">
-            This creates a compliance packet snapshot record. PDF/file generation is not connected yet.
-            Shift prep rows still await booking and timesheet approval.
-          </p>
+          {packet.incidentNotes ? <p className="mt-3 text-sm text-[#607583]"><strong className="font-semibold text-[#13334F]">Incident notes:</strong> {packet.incidentNotes}</p> : null}
+          {packet.missingItems?.length ? <p className="mt-3 text-sm text-[#9B6419]">Still needed: {packet.missingItems.join(' · ')}</p> : null}
+
+          {(packet.canGenerateSnapshot || packet.isSimulated || packet.packetStatus === 'ready') ? (
+            <button type="button" onClick={onGenerate} disabled={busy || mockQueued} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[#2F8E7A] disabled:opacity-50"><Download className="h-4 w-4" />{busy ? 'Working…' : mockQueued ? 'Queued' : packet.canGenerateSnapshot ? 'Generate packet snapshot' : packet.isSimulated ? 'Queue packet' : 'Download packet'}</button>
+          ) : null}
         </div>
-
-        {loading && <LoadingBlock />}
-        {error && <ErrorBlock message={error.message} onRetry={reload} />}
-
-        {!loading && !error && compliancePackets && compliancePackets.length === 0 && (
-          <EmptyBlock />
-        )}
-
-        {!loading && !error && compliancePackets && compliancePackets.length > 0 && (
-          <div className="space-y-4">
-            {compliancePackets.map(packet => (
-              <article
-                key={packet.id}
-                className="overflow-hidden rounded-2xl border border-[#DDE7E8] bg-white p-4 shadow-sm"
-              >
-                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#E6F6F2] text-[#257665]">
-                      <ClipboardList className="h-5 w-5" aria-hidden />
-                    </div>
-                    <div className="min-w-0">
-                      <h2 className="font-semibold text-[#13334F]">
-                        {packet.shiftRoleTitle} — {packet.siteName}
-                      </h2>
-                      <p className="mt-0.5 text-sm text-[#607583]">{packet.shiftWhen}</p>
-                      {packet.isSimulated && (
-                        <p className="mt-1 text-xs text-[#9AAAB3]">
-                          Simulated readiness · not a generated packet
-                        </p>
-                      )}
-                      {packet.hasGeneratedSnapshot && (
-                        <p className="mt-1 text-xs text-[#9AAAB3]">
-                          Snapshot record only · file pending
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <PacketBadge packet={packet} />
-                </div>
-
-                <dl className="space-y-2 text-sm">
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Worker</dt>
-                    <dd className="text-[#10283D]">{packet.workerName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Site</dt>
-                    <dd className="text-[#10283D]">{packet.siteName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">
-                      Credentials active at shift time
-                    </dt>
-                    <dd className="text-[#10283D]">{packet.credentialsAtShift}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Clock in / out</dt>
-                    <dd className="text-[#10283D]">{packet.clockSummary}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">Approval status</dt>
-                    <dd className="text-[#10283D]">{packet.approvalLine}</dd>
-                  </div>
-                  {packet.hasGeneratedSnapshot && (
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">File</dt>
-                      <dd className="text-[#10283D]">Pending</dd>
-                    </div>
-                  )}
-                  {packet.isSimulated && packet.missingItems && packet.missingItems.length > 0 && (
-                    <div>
-                      <dt className="text-xs font-medium uppercase tracking-wide text-[#607583]">
-                        Required before packet
-                      </dt>
-                      <dd className="text-[#10283D]">
-                        <ul className="mt-1 list-inside list-disc space-y-0.5">
-                          {packet.missingItems.map(item => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-
-                {packet.canGenerateSnapshot && packet.timesheetId && (
-                  <button
-                    type="button"
-                    disabled={isPending(`packet-${packet.timesheetId}`)}
-                    onClick={async () => {
-                      const r = await run(`packet-${packet.timesheetId}`, () =>
-                        generateProviderCompliancePacketFromApprovedTimesheet(packet.timesheetId!),
-                      );
-                      if (r.ok) {
-                        toast.success(r.data.message);
-                        reload();
-                      } else {
-                        toast.error(r.error.message);
-                      }
-                    }}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#13334F] px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    Generate packet snapshot
-                  </button>
-                )}
-
-                {packet.isSimulated && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      toast.message(
-                        'Compliance packet generation will be connected after bookings, credentials, and timesheets are wired.',
-                      );
-                    }}
-                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-[#DDE7E8] bg-white px-4 py-3 text-sm font-medium text-[#13334F] transition-colors hover:bg-[#F7FAFA]"
-                  >
-                    Queue packet
-                  </button>
-                )}
-              </article>
-            ))}
-          </div>
-        )}
       </div>
-    </div>
+    </article>
   );
 }
 
 export default function Compliance() {
   const supabaseMode = isSupabaseBackendEnabled();
-  if (supabaseMode) {
-    return <SupabaseComplianceView />;
-  }
-  return <MockComplianceView />;
+  const { run, isPending } = useProviderAction();
+  const { data: packets, error, loading, reload } = useAsyncResource(() => listCompliancePackets(), []);
+  const [queuedIds, setQueuedIds] = useState<Set<string>>(() => new Set());
+
+  return (
+    <div className="min-h-full bg-white text-[#10283D]">
+      <div className="mx-auto w-full max-w-3xl px-4 pb-10 pt-5 sm:px-6">
+        <header className="border-b border-[#DDE7E8] pb-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Close the loop</p>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.035em] text-[#13334F]">Compliance packets</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[#607583]">One place for the worker, credentials, time record, approval, and incident context behind a completed shift.</p>
+        </header>
+
+        {supabaseMode ? <p className="border-b border-[#DDE7E8] py-4 text-xs leading-5 text-[#9AAAB3]">Generated snapshots are readiness records today; PDF/file delivery is not connected yet.</p> : null}
+        {loading && <p className="border-b border-[#DDE7E8] py-10 text-center text-sm text-[#607583]">Loading compliance history…</p>}
+        {error && <div className="border-b border-[#DDE7E8] py-10 text-center"><p className="text-sm text-[#607583]">{error.message}</p><button type="button" onClick={reload} className="mt-3 text-sm font-semibold text-[#2F8E7A]">Try again</button></div>}
+        {!loading && !error && packets?.length === 0 ? <section className="py-12 text-center"><ClipboardList className="mx-auto h-8 w-8 text-[#53B59F]" /><p className="mt-3 font-semibold text-[#13334F]">No packet-ready shifts yet.</p><p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#607583]">Packets appear after booking, clock events, worker submission, and provider approval create a complete shift record.</p></section> : null}
+
+        {!loading && !error && packets?.length ? (
+          <section className="pt-7"><div className="flex items-end justify-between gap-4 pb-3"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Shift records</p><h2 className="mt-1 text-xl font-semibold text-[#13334F]">{packets.length} packet {packets.length === 1 ? 'record' : 'records'}</h2></div></div><div className="border-t border-[#BFCED4]">{packets.map(packet => <PacketRow key={packet.id} packet={packet} busy={Boolean(packet.timesheetId && isPending(`packet-${packet.timesheetId}`))} mockQueued={queuedIds.has(packet.id)} onGenerate={async () => {
+            if (supabaseMode && packet.canGenerateSnapshot && packet.timesheetId) {
+              const result = await run(`packet-${packet.timesheetId}`, () => generateProviderCompliancePacketFromApprovedTimesheet(packet.timesheetId!));
+              if (result.ok) { toast.success(result.data.message); reload(); } else toast.error(result.error.message);
+              return;
+            }
+            if (packet.isSimulated) toast.message('Packet generation will connect after booking, credentials, and timesheets are fully wired.'); else toast.success('Compliance packet download queued');
+            setQueuedIds(previous => new Set(previous).add(packet.id));
+          }} />)}</div></section>
+        ) : null}
+      </div>
+    </div>
+  );
 }
