@@ -6,6 +6,7 @@ import {
   CreditCard,
   Gift,
   LogOut,
+  Settings,
   ShieldAlert,
   Star,
   User,
@@ -54,6 +55,7 @@ export default function WorkerAccount() {
     { to: '/worker/pay' as const, label: 'Earnings & payouts', sub: 'Track approved work and payout readiness.', icon: CreditCard },
     { to: '/worker/referrals' as const, label: 'Referrals', sub: 'Refer care sites and track rewards.', icon: Gift },
     { to: '/worker/safety' as const, label: 'Safety reports', sub: 'Document concerns securely.', icon: ShieldAlert },
+    { to: '/worker/settings' as const, label: 'Settings', sub: 'Notifications, account preferences, and help.', icon: Settings },
   ];
 
   return (
