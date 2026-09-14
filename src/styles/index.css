@@ -73,6 +73,90 @@ section > video[autoplay] + div + div {
   font-size: 16px;
 }
 
+/* Admin cross-screen polish: preserve dense operational information without
+   falling back to generic dashboard-card language. Tables remain contained,
+   while typography, focus, rows, and section rhythm align with worker/provider. */
+.admin-ui {
+  text-rendering: optimizeLegibility;
+}
+
+.admin-ui button,
+.admin-ui a,
+.admin-ui input,
+.admin-ui select,
+.admin-ui textarea {
+  font: inherit;
+}
+
+.admin-ui button,
+.admin-ui a {
+  touch-action: manipulation;
+}
+
+.admin-ui button:focus-visible,
+.admin-ui a:focus-visible,
+.admin-ui input:focus-visible,
+.admin-ui select:focus-visible,
+.admin-ui textarea:focus-visible {
+  outline: 2px solid #53B59F;
+  outline-offset: 2px;
+}
+
+.admin-ui h1,
+.admin-ui h2,
+.admin-ui h3 {
+  text-wrap: balance;
+  letter-spacing: -0.025em;
+}
+
+.admin-ui p {
+  text-wrap: pretty;
+}
+
+.admin-ui main table {
+  border-collapse: collapse;
+}
+
+.admin-ui main thead {
+  background: transparent !important;
+}
+
+.admin-ui main th {
+  padding-top: 0.8rem !important;
+  padding-bottom: 0.8rem !important;
+  font-size: 0.72rem !important;
+  line-height: 1rem !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #607583 !important;
+}
+
+.admin-ui main td {
+  padding-top: 0.9rem !important;
+  padding-bottom: 0.9rem !important;
+  vertical-align: middle;
+}
+
+.admin-ui main tbody tr {
+  transition: background-color 120ms ease;
+}
+
+.admin-ui main tbody tr:hover {
+  background: #F7FAFA;
+}
+
+.admin-ui main .shadow-sm,
+.admin-ui main .shadow-md,
+.admin-ui main .shadow-lg {
+  box-shadow: none !important;
+}
+
+.admin-ui main input,
+.admin-ui main select,
+.admin-ui main textarea {
+  border-radius: 0.65rem;
+}
+
 @media (max-width: 639px) {
   .worker-ui button,
   .worker-ui a {
@@ -107,7 +191,10 @@ section > video[autoplay] + div + div {
 
   .worker-ui *,
   .worker-ui *::before,
-  .worker-ui *::after {
+  .worker-ui *::after,
+  .admin-ui *,
+  .admin-ui *::before,
+  .admin-ui *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
