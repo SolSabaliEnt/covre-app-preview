@@ -17,64 +17,34 @@ type UserRow = {
 };
 
 function AccStatus({ s }: { s: 'active' | 'suspended' | 'review' }) {
-  if (s === 'active') {
-    return <StatusBadge variant="covered">Active</StatusBadge>;
-  }
-  if (s === 'review') {
-    return <StatusBadge variant="pending">Review</StatusBadge>;
-  }
+  if (s === 'active') return <StatusBadge variant="covered">Active</StatusBadge>;
+  if (s === 'review') return <StatusBadge variant="pending">Review</StatusBadge>;
   return <StatusBadge variant="missing">Suspended</StatusBadge>;
 }
 
 function UserTable({ rows }: { rows: UserRow[] }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[800px] text-left text-sm">
-        <thead className="border-b border-[#DDE7E8] bg-[#F7FAFA]">
+    <div className="overflow-x-auto border-t border-[#BFCED4]">
+      <table className="w-full min-w-[820px] text-left text-sm">
+        <thead className="border-b border-[#DDE7E8]">
           <tr>
-            <th className="p-3 font-semibold text-[#13334F]">Name</th>
-            <th className="p-3 font-semibold text-[#13334F]">Account type</th>
-            <th className="p-3 font-semibold text-[#13334F]">Status</th>
-            <th className="p-3 font-semibold text-[#13334F]">Role</th>
-            <th className="p-3 font-semibold text-[#13334F]">Location / site</th>
-            <th className="p-3 font-semibold text-[#13334F]">Last active</th>
-            <th className="p-3 font-semibold text-[#13334F]">Actions</th>
+            <th className="p-3">Name</th><th className="p-3">Account type</th><th className="p-3">Status</th><th className="p-3">Role</th><th className="p-3">Location / site</th><th className="p-3">Last active</th><th className="p-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(row => (
             <tr key={row.id} className="border-b border-[#DDE7E8]">
-              <td className="p-3 font-medium text-[#10283D]">{row.name}</td>
+              <td className="p-3 font-semibold text-[#13334F]">{row.name}</td>
               <td className="p-3 text-[#607583]">{row.accountType}</td>
-              <td className="p-3">
-                <AccStatus s={row.status} />
-              </td>
+              <td className="p-3"><AccStatus s={row.status} /></td>
               <td className="p-3 text-[#607583]">{row.role}</td>
               <td className="p-3 text-[#607583]">{row.location}</td>
               <td className="p-3 text-[#607583]">{row.lastActive}</td>
               <td className="p-3">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={() => toast(`Profile: ${row.name}`)}
-                    className="rounded-lg bg-[#13334F] px-2.5 py-1 text-xs font-medium text-white hover:bg-[#0B243A]"
-                  >
-                    View
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toast(`Deactivate flow: ${row.name}`)}
-                    className="rounded-lg border border-[#D94A4A] bg-white px-2.5 py-1 text-xs font-medium text-[#A93636] hover:bg-[#FDEAEA]"
-                  >
-                    Deactivate
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => toast.success(`Invite sent (mock): ${row.name}`)}
-                    className="rounded-lg border border-[#53B59F] bg-[#E6F6F2] px-2.5 py-1 text-xs font-medium text-[#257665] hover:bg-[#D4EFE8]"
-                  >
-                    Send Invite
-                  </button>
+                <div className="flex flex-wrap gap-3 text-xs font-semibold">
+                  <button type="button" onClick={() => toast(`Profile: ${row.name}`)} className="text-[#13334F] hover:text-[#2F8E7A]">View</button>
+                  <button type="button" onClick={() => toast(`Deactivate flow: ${row.name}`)} className="text-[#A93636] hover:text-[#7E2929]">Deactivate</button>
+                  <button type="button" onClick={() => toast.success(`Invite sent (mock): ${row.name}`)} className="text-[#2F8E7A] hover:text-[#257665]">Send invite</button>
                 </div>
               </td>
             </tr>
@@ -95,85 +65,37 @@ export default function Users() {
   const [tab, setTab] = useState<Tab>('workers');
   const { data, error, loading, reload } = useAsyncResource(() => listUsersAndProviders(), []);
 
-  if (loading) {
-    return (
-      <>
-        <div className="border-b border-[#DDE7E8] bg-white p-6">
-          <div className="mx-auto max-w-7xl">
-            <h1 className="text-3xl font-semibold text-[#13334F]">Users &amp; Providers</h1>
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl p-6">
-          <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-            <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
-          </div>
-        </div>
-      </>
-    );
-  }
-  if (error) {
-    return (
-      <>
-        <div className="border-b border-[#DDE7E8] bg-white p-6">
-          <div className="mx-auto max-w-7xl">
-            <h1 className="text-3xl font-semibold text-[#13334F]">Users &amp; Providers</h1>
-          </div>
-        </div>
-        <div className="mx-auto max-w-7xl p-6">
-          <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-            <p className="text-center text-sm text-[#607583]">{error.message}</p>
-            <button
-              type="button"
-              onClick={reload}
-              className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0B243A]"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      </>
-    );
-  }
-  if (!data) {
-    return null;
-  }
+  if (loading) return <div className="mx-auto max-w-7xl p-6 text-sm text-[#607583]">Loading users…</div>;
+  if (error) return <div className="mx-auto max-w-7xl p-6"><div className="border-y border-[#DDE7E8] py-8"><p className="text-sm text-[#607583]">{error.message}</p><button type="button" onClick={reload} className="mt-4 rounded-lg bg-[#13334F] px-4 py-2.5 text-sm font-semibold text-white">Retry</button></div></div>;
+  if (!data) return null;
 
   const { workers, providers, admins } = data;
   const rows = tab === 'workers' ? workers : tab === 'providers' ? providers : admins;
 
   return (
-    <>
-      <div className="border-b border-[#DDE7E8] bg-white p-6">
+    <div className="min-h-full bg-[#F7FAFA]">
+      <header className="border-b border-[#DDE7E8] bg-white px-6 py-6">
         <div className="mx-auto max-w-7xl">
-          <h1 className="text-3xl font-semibold text-[#13334F]">Users &amp; Providers</h1>
-          <p className="mt-1 text-[#607583]">
-            Manage workers, provider organizations, facility admins, and account status.
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">People</p>
+          <h1 className="mt-1 text-3xl font-semibold text-[#13334F]">Users + organizations</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#607583]">Review worker accounts, provider organizations, workspace admins, and account state without losing sight of who each record represents.</p>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto max-w-7xl space-y-6 p-6">
-        <div className="flex flex-wrap gap-2 border-b border-[#DDE7E8] pb-4">
+      <main className="mx-auto max-w-7xl p-6">
+        <div className="flex flex-wrap gap-6 border-b border-[#DDE7E8]">
           {tabs.map(t => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F] ${
-                tab === t.id
-                  ? 'bg-[#13334F] text-white'
-                  : 'bg-white text-[#607583] ring-1 ring-[#DDE7E8] hover:bg-[#F7FAFA]'
-              }`}
-            >
-              {t.label}
-            </button>
+            <button key={t.id} type="button" onClick={() => setTab(t.id)} className={`border-b-2 pb-3 text-sm font-semibold ${tab === t.id ? 'border-[#53B59F] text-[#13334F]' : 'border-transparent text-[#607583] hover:text-[#13334F]'}`}>{t.label}</button>
           ))}
         </div>
-
-        <section className="rounded-xl border border-[#DDE7E8] bg-white p-0">
+        <div className="pt-5">
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Current view</p><h2 className="mt-1 text-xl font-semibold text-[#13334F]">{tabs.find(item => item.id === tab)?.label}</h2></div>
+            <span className="text-sm text-[#607583]">{rows.length} records</span>
+          </div>
           <UserTable rows={rows} />
-        </section>
-      </div>
-    </>
+        </div>
+      </main>
+    </div>
   );
 }
