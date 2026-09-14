@@ -42,11 +42,11 @@ const careRecord = [
 export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-[#10283D]">
-      <section className="relative min-h-[720px] overflow-hidden bg-[#13334F] text-white sm:min-h-[760px] lg:min-h-[790px]">
+      <section className="relative min-h-[840px] overflow-hidden bg-[#13334F] text-white sm:min-h-[760px] lg:min-h-[790px]">
         <video
           src="/covre-header-background-web.mp4"
           poster="/covre-header-poster.jpg"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center lg:object-[64%_center]"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[70%_center] sm:object-[64%_center]"
           autoPlay
           muted
           loop
@@ -55,11 +55,11 @@ export default function Landing() {
           aria-hidden="true"
           tabIndex={-1}
         />
-        <div className="pointer-events-none absolute inset-0 bg-[#0B243A]/36" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,36,58,0.98)_0%,rgba(11,36,58,0.88)_39%,rgba(11,36,58,0.42)_67%,rgba(11,36,58,0.12)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0B243A]/72 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[#0B243A]/24" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,36,58,0.96)_0%,rgba(11,36,58,0.88)_38%,rgba(11,36,58,0.42)_66%,rgba(11,36,58,0.10)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-52 bg-gradient-to-t from-[#0B243A]/72 to-transparent" />
 
-        <div className="relative z-10 mx-auto flex min-h-[720px] max-w-7xl flex-col px-5 pb-9 pt-5 sm:min-h-[760px] sm:px-6 lg:min-h-[790px] lg:pb-11 lg:pt-6">
+        <div className="relative z-10 mx-auto flex min-h-[840px] max-w-7xl flex-col px-5 pb-7 pt-5 sm:min-h-[760px] sm:px-6 sm:pb-9 lg:min-h-[790px] lg:pb-11 lg:pt-6">
           <header className="flex items-center justify-between gap-4">
             <Link to="/" className="block min-w-0 shrink">
               <img src={LANDING_LOGO_SRC} alt="Covre" width={906} height={209} loading="eager" decoding="async" className={LANDING_LOGO_HERO_CLASS} />
@@ -77,22 +77,22 @@ export default function Landing() {
             </div>
           </header>
 
-          <div className="flex flex-1 items-center py-16 sm:py-20 lg:py-24">
-            <div className="max-w-[760px]">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#B7E4DA]">
-                <HeartPulse className="h-4 w-4" aria-hidden />
-                Care staffing, with memory
+          <div className="flex flex-1 items-end pb-3 pt-36 sm:items-center sm:py-20 lg:py-24">
+            <div className="w-full max-w-[760px]">
+              <div className="flex max-w-[14rem] items-start gap-2 text-[0.7rem] font-semibold uppercase leading-5 tracking-[0.18em] text-[#B7E4DA] sm:max-w-none sm:items-center sm:text-xs">
+                <HeartPulse className="mt-0.5 h-4 w-4 shrink-0 sm:mt-0" aria-hidden />
+                <span>Care staffing, with memory</span>
               </div>
 
-              <h1 className="mt-6 max-w-[720px] text-[3.1rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-[5rem]">
+              <h1 className="mt-5 max-w-[17rem] text-[3rem] font-semibold leading-[0.98] tracking-[-0.055em] text-white sm:mt-6 sm:max-w-[720px] sm:text-6xl lg:text-[5rem]">
                 Coverage should feel like part of the care plan.
               </h1>
 
-              <p className="mt-7 max-w-[650px] text-lg leading-8 text-white/80 sm:text-xl">
+              <p className="mt-6 max-w-[22rem] text-base leading-7 text-white/82 sm:mt-7 sm:max-w-[650px] sm:text-xl sm:leading-8">
                 Covre connects an open shift to the professional, credentials, site knowledge, and approved work history that make the decision safer and more informed.
               </p>
 
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col gap-3 sm:mt-9 sm:flex-row">
                 <Link to={PROVIDER_ENTRY_PATH} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#53B59F] px-6 text-base font-semibold text-white transition-colors hover:bg-[#2F8E7A]">
                   Cover a shift <ArrowRight className="h-5 w-5" aria-hidden />
                 </Link>
@@ -103,7 +103,7 @@ export default function Landing() {
             </div>
           </div>
 
-          <div className="grid gap-3 border-t border-white/14 pt-5 text-xs text-white/64 sm:grid-cols-4 sm:text-sm">
+          <div className="hidden gap-3 border-t border-white/14 pt-5 text-xs text-white/64 sm:grid sm:grid-cols-4 sm:text-sm">
             <TrustPoint icon={<BadgeCheck className="h-4 w-4" />} text="Credential-aware" />
             <TrustPoint icon={<MapPin className="h-4 w-4" />} text="Site familiarity" />
             <TrustPoint icon={<ShieldCheck className="h-4 w-4" />} text="Approved work history" />
