@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { StatusBadge } from '../../components/StatusBadge';
+import { AdminIdentityAvatar } from '../../components/AdminIdentityAvatar';
 import { toast } from 'sonner';
 import { listUsersAndProviders } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
@@ -22,7 +23,9 @@ function AccStatus({ s }: { s: 'active' | 'suspended' | 'review' }) {
   return <StatusBadge variant="missing">Suspended</StatusBadge>;
 }
 
-function UserTable({ rows }: { rows: UserRow[] }) {
+function UserTable({ rows, tab }: { rows: UserRow[]; tab: Tab }) {
+  const kind = tab === 'workers' ? 'worker' : tab === 'providers' ? 'provider' : 'admin';
+
   return (
     <div className="overflow-x-auto border-t border-[#BFCED4]">
       <table className="w-full min-w-[820px] text-left text-sm">
@@ -34,7 +37,12 @@ function UserTable({ rows }: { rows: UserRow[] }) {
         <tbody>
           {rows.map(row => (
             <tr key={row.id} className="border-b border-[#DDE7E8]">
-              <td className="p-3 font-semibold text-[#13334F]">{row.name}</td>
+              <td className="p-3">
+                <div className="flex items-center gap-3">
+                  <AdminIdentityAvatar kind={kind} name={row.name} entityId={row.id} size="sm" />
+                  <span className="font-semibold text-[#13334F]">{row.name}</span>
+                </div>
+              </td>
               <td className="p-3 text-[#607583]">{row.accountType}</td>
               <td className="p-3"><AccStatus s={row.status} /></td>
               <td className="p-3 text-[#607583]">{row.role}</td>
@@ -93,7 +101,7 @@ export default function Users() {
             <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Current view</p><h2 className="mt-1 text-xl font-semibold text-[#13334F]">{tabs.find(item => item.id === tab)?.label}</h2></div>
             <span className="text-sm text-[#607583]">{rows.length} records</span>
           </div>
-          <UserTable rows={rows} />
+          <UserTable rows={rows} tab={tab} />
         </div>
       </main>
     </div>
