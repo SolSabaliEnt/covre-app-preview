@@ -5,18 +5,16 @@ import { getAdminMarketplaceView } from '../../services';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 
 const METRIC_STYLES = [
-  { Icon: AlertTriangle, box: 'bg-[#FDEAEA]', icon: 'text-[#D94A4A]' },
-  { Icon: Users, box: 'bg-[#E6F6F2]', icon: 'text-[#53B59F]' },
-  { Icon: Activity, box: 'bg-[#E8EEF2]', icon: 'text-[#13334F]' },
-  { Icon: TrendingUp, box: 'bg-[#E6F6F2]', icon: 'text-[#53B59F]' },
+  { Icon: AlertTriangle, tone: 'text-[#A93636]' },
+  { Icon: Users, tone: 'text-[#2F8E7A]' },
+  { Icon: Activity, tone: 'text-[#13334F]' },
+  { Icon: TrendingUp, tone: 'text-[#2F8E7A]' },
 ] as const;
 
 function LoadingBlock() {
   return (
     <div className="mx-auto max-w-7xl p-6">
-      <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-        <p className="text-center text-sm font-medium text-[#13334F]">Loading…</p>
-      </div>
+      <div className="border-y border-[#DDE7E8] py-10 text-sm text-[#607583]">Loading marketplace activity…</div>
     </div>
   );
 }
@@ -24,15 +22,9 @@ function LoadingBlock() {
 function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="mx-auto max-w-7xl p-6">
-      <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 shadow-sm">
-        <p className="text-center text-sm text-[#607583]">{message}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-4 w-full rounded-xl bg-[#13334F] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#0B243A]"
-        >
-          Retry
-        </button>
+      <div className="border-y border-[#DDE7E8] py-8">
+        <p className="text-sm text-[#607583]">{message}</p>
+        <button type="button" onClick={onRetry} className="mt-4 rounded-lg bg-[#13334F] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#0B243A]">Retry</button>
       </div>
     </div>
   );
@@ -41,141 +33,91 @@ function ErrorBlock({ message, onRetry }: { message: string; onRetry: () => void
 export default function AdminMarketplace() {
   const { data, error, loading, reload } = useAsyncResource(() => getAdminMarketplaceView(), []);
 
-  if (loading) {
-    return (
-      <>
-        <div className="border-b border-[#DDE7E8] bg-white p-6">
-          <div className="mx-auto max-w-7xl">
-            <h1 className="text-3xl font-semibold text-[#13334F]">Marketplace Command Center</h1>
-          </div>
-        </div>
-        <LoadingBlock />
-      </>
-    );
-  }
-  if (error) {
-    return (
-      <>
-        <div className="border-b border-[#DDE7E8] bg-white p-6">
-          <div className="mx-auto max-w-7xl">
-            <h1 className="text-3xl font-semibold text-[#13334F]">Marketplace Command Center</h1>
-          </div>
-        </div>
-        <ErrorBlock message={error.message} onRetry={reload} />
-      </>
-    );
-  }
-  if (!data) {
-    return <LoadingBlock />;
-  }
+  if (loading) return <LoadingBlock />;
+  if (error) return <ErrorBlock message={error.message} onRetry={reload} />;
+  if (!data) return <LoadingBlock />;
 
   const { metrics: adminMetrics, urgentShifts, workers } = data;
   const workerAvailability = workers.slice(0, 3);
 
   return (
-    <>
-      <div className="bg-white border-b border-[#DDE7E8] p-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-semibold text-[#13334F]">Marketplace Command Center</h1>
-          <p className="text-[#607583] mt-1">Live view of platform activity</p>
+    <div className="min-h-full bg-[#F7FAFA]">
+      <header className="border-b border-[#DDE7E8] bg-white px-6 py-6">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Marketplace</p>
+          <h1 className="mt-1 text-3xl font-semibold text-[#13334F]">Marketplace command center</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#607583]">See where coverage can still break, who is available to help, and what needs an operator decision next.</p>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <main className="mx-auto max-w-7xl space-y-8 p-6">
+        <section className="grid gap-5 border-b border-[#DDE7E8] pb-6 md:grid-cols-4">
           {adminMetrics.map((m, i) => {
             const style = METRIC_STYLES[i] ?? METRIC_STYLES[2];
             const Icon = style.Icon;
             return (
-              <div key={m.label} className="bg-white rounded-xl border border-[#DDE7E8] p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${style.box}`}>
-                    <Icon className={`w-6 h-6 ${style.icon}`} />
-                  </div>
+              <div key={m.label} className="min-w-0">
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-[#607583]">
+                  <Icon className={`h-4 w-4 ${style.tone}`} aria-hidden />
+                  {m.label}
                 </div>
-                <div className="text-3xl font-semibold text-[#13334F]">{m.value}</div>
-                <div className="text-sm text-[#607583]">{m.label}</div>
+                <div className="text-3xl font-semibold tracking-tight text-[#13334F]">{m.value}</div>
               </div>
             );
           })}
-        </div>
+        </section>
 
-        <div className="bg-white rounded-xl border border-[#DDE7E8] p-6">
-          <h2 className="text-xl font-semibold text-[#13334F] mb-4">At-Risk Shifts (Next 24 Hours)</h2>
-          <div className="space-y-3">
+        <section>
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#A93636]">Needs attention</p>
+              <h2 className="mt-1 text-xl font-semibold text-[#13334F]">At-risk shifts in the next 24 hours</h2>
+            </div>
+            <span className="text-sm text-[#607583]">{urgentShifts.length} open</span>
+          </div>
+          <div className="border-t border-[#BFCED4]">
             {urgentShifts.map(shift => (
-              <div
-                key={shift.id}
-                className="flex max-w-full flex-wrap items-center justify-between gap-4 overflow-hidden rounded-lg border border-[#D94A4A] bg-[#FDEAEA] p-4"
-              >
-                <Link
-                  to={`/admin/shifts/${shift.id}`}
-                  className="min-w-0 flex-1 rounded-md outline-none ring-[#53B59F] transition-colors focus-visible:ring-2"
-                >
-                  <div className="font-semibold text-[#13334F]">
-                    {shift.providerName} — {shift.siteName}
-                  </div>
-                  <div className="text-sm text-[#607583]">
-                    {shift.roleTitle} • {shift.dateLabel} {shift.timeRange}
-                  </div>
+              <div key={shift.id} className="grid grid-cols-[1fr_auto] items-center gap-5 border-b border-[#DDE7E8] py-4">
+                <Link to={`/admin/shifts/${shift.id}`} className="min-w-0 no-underline">
+                  <p className="font-semibold text-[#13334F]">{shift.providerName} — {shift.siteName}</p>
+                  <p className="mt-1 text-sm text-[#607583]">{shift.roleTitle} · {shift.dateLabel} {shift.timeRange}</p>
                 </Link>
-                <div className="flex shrink-0 flex-wrap items-center gap-4">
+                <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <div className="font-semibold text-[#13334F]">{shift.hourlyPayDisplay}</div>
+                    <p className="font-semibold text-[#13334F]">{shift.hourlyPayDisplay}</p>
                     <StatusBadge variant="urgent">Urgent</StatusBadge>
                   </div>
-                  <button
-                    type="button"
-                    className="rounded-lg bg-[#53B59F] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2F8E7A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
-                  >
-                    Find Match
-                  </button>
+                  <button type="button" className="rounded-lg bg-[#53B59F] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2F8E7A]">Find match</button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="bg-white rounded-xl border border-[#DDE7E8] p-6">
-          <h2 className="text-xl font-semibold text-[#13334F] mb-4">High-Availability Workers</h2>
-          <div className="space-y-3">
+        <section>
+          <div className="mb-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Worker availability</p>
+            <h2 className="mt-1 text-xl font-semibold text-[#13334F]">High-availability workers</h2>
+          </div>
+          <div className="border-t border-[#BFCED4]">
             {workerAvailability.map(worker => (
-              <div
-                key={worker.id}
-                className="flex items-center justify-between p-4 bg-[#F3FBF8] border border-[#E6F6F2] rounded-lg"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-[#53B59F] rounded-full flex items-center justify-center text-white font-semibold">
-                    {worker.name
-                      .split(' ')
-                      .map(n => n[0])
-                      .join('')}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-[#13334F]">{worker.name}</div>
-                    <div className="text-sm text-[#607583]">
-                      {worker.primaryRole} • Score: {worker.covreScore}
-                    </div>
-                  </div>
+              <div key={worker.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-4 border-b border-[#DDE7E8] py-4">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#E6F6F2] text-sm font-semibold text-[#257665]">
+                  {worker.name.split(' ').map(n => n[0]).join('')}
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className="text-sm text-[#607583]">
-                      Available {worker.availabilityNote ?? '—'}
-                    </div>
-                    <div className="font-medium text-[#13334F]">
-                      {worker.openShiftsWilling ?? 0} shifts open
-                    </div>
-                  </div>
-                  <button className="px-4 py-2 bg-[#E8EEF2] text-[#13334F] rounded-lg hover:bg-[#DDE7E8] transition-colors font-medium">
-                    Invite
-                  </button>
+                <div className="min-w-0">
+                  <p className="font-semibold text-[#13334F]">{worker.name}</p>
+                  <p className="mt-1 text-sm text-[#607583]">{worker.primaryRole} · Score {worker.covreScore} · Available {worker.availabilityNote ?? '—'}</p>
+                </div>
+                <div className="flex items-center gap-5">
+                  <p className="text-sm text-[#607583]"><span className="font-semibold text-[#13334F]">{worker.openShiftsWilling ?? 0}</span> shifts open</p>
+                  <button type="button" className="text-sm font-semibold text-[#2F8E7A] hover:text-[#257665]">Invite</button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </>
+        </section>
+      </main>
+    </div>
   );
 }
