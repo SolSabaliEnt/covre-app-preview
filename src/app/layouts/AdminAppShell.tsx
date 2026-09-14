@@ -9,7 +9,7 @@ export function AdminAppShell() {
   const accountLabel = isAuthenticated ? name || 'Covre Ops' : 'Covre Ops';
 
   return (
-    <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-[#F7FAFA]">
+    <div className="admin-ui min-h-dvh w-full max-w-full overflow-x-hidden bg-[#F7FAFA] text-[#10283D]">
       <div
         data-route-scroll-root="true"
         data-route-scroll-container="true"
