@@ -1,7 +1,7 @@
 import { Link, Outlet } from 'react-router';
 import { AdminNav } from '../components/AdminNav';
 import { CovreBrandLogo } from '../components/CovreBrandLogo';
-import { ADMIN_ENTRY_PATH, AUTH_COMPAT_PATH, PROVIDER_ENTRY_PATH } from '../lib/entryRoutes';
+import { ADMIN_ENTRY_PATH, PROVIDER_ENTRY_PATH } from '../lib/entryRoutes';
 import { useAuth } from '../auth/AuthContext';
 
 export function AdminAppShell() {
@@ -10,32 +10,35 @@ export function AdminAppShell() {
 
   return (
     <div className="min-h-dvh w-full max-w-full overflow-x-hidden bg-[#F7FAFA]">
-      {/* Mobile & tablet: desktop-only gate — no sidebar squeeze */}
       <div
         data-route-scroll-root="true"
         data-route-scroll-container="true"
-        className="flex min-h-dvh w-full flex-col items-center justify-start overflow-y-auto px-6 pb-10 pt-[calc(1.5rem+env(safe-area-inset-top))] lg:hidden"
+        className="flex min-h-dvh w-full flex-col justify-between overflow-y-auto bg-[#F7FAFA] px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top))] lg:hidden"
       >
-        <CovreBrandLogo
-          surface="light"
-          layout="mark"
-          width={72}
-          className="shrink-0"
-          imgClassName="h-16 w-16 object-contain"
-          alt="Covre"
-        />
-        <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-[#607583]">Admin Console</p>
-        <p className="mt-1 text-sm text-[#13334F]">{accountLabel}</p>
+        <div className="mx-auto w-full max-w-md">
+          <div className="flex items-center justify-between">
+            <CovreBrandLogo
+              surface="light"
+              layout="mark"
+              width={64}
+              className="shrink-0"
+              imgClassName="h-14 w-14 object-contain"
+              alt="Covre"
+            />
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#2F8E7A]">Admin console</span>
+          </div>
 
-        <h1 className="mt-8 max-w-md text-center text-xl font-semibold leading-snug text-[#13334F]">
-          Admin Console is desktop-only
-        </h1>
-        <p className="mt-4 max-w-md text-center text-sm leading-relaxed text-[#607583]">
-          For security and operational clarity, Covre Admin is optimized for a larger desktop screen. Open this
-          workspace on a laptop or desktop to continue.
-        </p>
+          <div className="mt-16 border-t border-[#DDE7E8] pt-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Desktop workspace</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-[#13334F]">Run Covre from a larger screen.</h1>
+            <p className="mt-4 text-sm leading-6 text-[#607583]">
+              Admin is intentionally desktop-first so operational queues, marketplace context, and review work stay clear and readable.
+            </p>
+            <p className="mt-6 text-sm font-medium text-[#13334F]">Signed in as {accountLabel}</p>
+          </div>
+        </div>
 
-        <div className="mt-10 flex w-full max-w-sm flex-col gap-3">
+        <div className="mx-auto mt-12 w-full max-w-md border-t border-[#DDE7E8] pt-6">
           <Link
             to={ADMIN_ENTRY_PATH}
             className="flex min-h-12 w-full items-center justify-center rounded-lg bg-[#13334F] px-5 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-[#0B243A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
@@ -44,20 +47,19 @@ export function AdminAppShell() {
           </Link>
           <Link
             to={PROVIDER_ENTRY_PATH}
-            className="flex min-h-12 w-full items-center justify-center rounded-lg border border-[#DDE7E8] bg-white px-5 py-3 text-center text-sm font-medium text-[#13334F] shadow-sm transition-colors hover:bg-[#F7FAFA] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#53B59F]"
+            className="mt-3 flex min-h-12 w-full items-center justify-center px-5 py-3 text-center text-sm font-semibold text-[#13334F] transition-colors hover:text-[#2F8E7A]"
           >
             Go to provider preview
           </Link>
         </div>
       </div>
 
-      {/* Desktop admin console */}
       <div className="hidden min-h-dvh w-full lg:flex">
         <AdminNav />
         <main
           data-route-scroll-root="true"
           data-route-scroll-container="true"
-          className="min-h-dvh min-w-0 flex-1 overflow-x-hidden overflow-y-auto"
+          className="min-h-dvh min-w-0 flex-1 overflow-x-hidden overflow-y-auto bg-[#F7FAFA]"
         >
           <Outlet />
         </main>
