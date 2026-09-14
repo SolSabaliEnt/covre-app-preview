@@ -165,20 +165,6 @@ section > video[autoplay] + div + div {
   .worker-ui [role='tab'] {
     min-height: 44px;
   }
-
-  section > video[autoplay] {
-    object-position: 72% center !important;
-    background-position: 72% center;
-    transform: translateX(4%) scale(1.12);
-  }
-}
-
-@media (min-width: 640px) and (max-width: 1023px) {
-  section > video[autoplay] {
-    object-position: 64% center !important;
-    background-position: 64% center;
-    transform: scale(1.05);
-  }
 }
 
 @media (min-width: 1024px) {
@@ -186,6 +172,14 @@ section > video[autoplay] + div + div {
     object-position: center center !important;
     background-position: center center;
     transform: translateX(10%) scale(1.22);
+  }
+}
+
+@media (max-width: 1023px) {
+  section > video[autoplay] {
+    object-position: center center !important;
+    background-position: center center;
+    transform: scale(1.04);
   }
 }
 
