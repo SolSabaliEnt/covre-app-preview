@@ -10,21 +10,20 @@ section > video[autoplay] {
   opacity: 1 !important;
   background: #13334F url('/covre-header-poster.jpg') center center / cover no-repeat;
   filter: saturate(0.94) contrast(1.03);
-  transform: scale(1.04);
   transform-origin: center center;
 }
 
 section > video[autoplay] + div {
-  background-color: rgba(11, 36, 58, 0.18) !important;
+  background-color: rgba(11, 36, 58, 0.14) !important;
 }
 
 section > video[autoplay] + div + div {
   background-image: linear-gradient(
     90deg,
-    rgba(11, 36, 58, 0.82) 0%,
-    rgba(11, 36, 58, 0.67) 34%,
-    rgba(11, 36, 58, 0.30) 62%,
-    rgba(11, 36, 58, 0.06) 100%
+    rgba(11, 36, 58, 0.88) 0%,
+    rgba(11, 36, 58, 0.70) 34%,
+    rgba(11, 36, 58, 0.25) 62%,
+    rgba(11, 36, 58, 0.03) 100%
   ) !important;
 }
 
@@ -166,6 +165,20 @@ section > video[autoplay] + div + div {
   .worker-ui [role='tab'] {
     min-height: 44px;
   }
+
+  section > video[autoplay] {
+    object-position: 72% center !important;
+    background-position: 72% center;
+    transform: translateX(4%) scale(1.12);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  section > video[autoplay] {
+    object-position: 64% center !important;
+    background-position: 64% center;
+    transform: scale(1.05);
+  }
 }
 
 @media (min-width: 1024px) {
@@ -173,14 +186,6 @@ section > video[autoplay] + div + div {
     object-position: center center !important;
     background-position: center center;
     transform: translateX(10%) scale(1.22);
-  }
-}
-
-@media (max-width: 1023px) {
-  section > video[autoplay] {
-    object-position: center center !important;
-    background-position: center center;
-    transform: scale(1.04);
   }
 }
 
