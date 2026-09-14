@@ -1,18 +1,5 @@
 import { Link } from 'react-router';
-import {
-  Activity,
-  Building2,
-  CalendarCheck,
-  CheckCircle2,
-  CircleAlert,
-  ClipboardCheck,
-  HeartHandshake,
-  MousePointerClick,
-  Network,
-  Repeat2,
-  ServerCog,
-  Users,
-} from 'lucide-react';
+import { CheckCircle2, CircleAlert } from 'lucide-react';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
 import {
   getAdminContinuityReadiness,
@@ -26,39 +13,38 @@ import {
 } from '../../services';
 import { isSupabaseBackendEnabled } from '../../lib/backendMode';
 
-type MetricCardProps = {
-  label: string;
-  value: string | number;
-  detail: string;
-  icon: typeof Activity;
-  to?: string;
-  accent?: boolean;
-};
-
-function MetricCard({ label, value, detail, icon: Icon, to, accent }: MetricCardProps) {
-  const card = (
-    <div className="h-full rounded-2xl border border-[#DDE7E8] bg-white p-5 shadow-sm">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#607583]">{label}</p>
-        <span
-          className={`flex h-9 w-9 items-center justify-center rounded-xl ${
-            accent ? 'bg-[#E6F6F2] text-[#257665]' : 'bg-[#E8EEF2] text-[#13334F]'
-          }`}
-        >
-          <Icon className="h-4 w-4" aria-hidden />
-        </span>
-      </div>
-      <p className="text-3xl font-semibold tracking-tight text-[#13334F]">{value}</p>
-      <p className="mt-2 text-sm leading-5 text-[#607583]">{detail}</p>
+function MetricRail({
+  items,
+}: {
+  items: Array<{ label: string; value: string | number; detail: string; to?: string }>;
+}) {
+  return (
+    <div className="grid gap-x-7 gap-y-5 border-y border-[#DDE7E8] py-5 sm:grid-cols-2 xl:grid-cols-4">
+      {items.map(item => {
+        const content = (
+          <>
+            <p className="text-2xl font-semibold tracking-[-0.03em] text-[#13334F]">{item.value}</p>
+            <p className="mt-1 text-sm font-semibold text-[#13334F]">{item.label}</p>
+            <p className="mt-1 text-xs leading-5 text-[#607583]">{item.detail}</p>
+          </>
+        );
+        return item.to ? (
+          <Link key={item.label} to={item.to} className="block no-underline transition-opacity hover:opacity-75">{content}</Link>
+        ) : (
+          <div key={item.label}>{content}</div>
+        );
+      })}
     </div>
   );
+}
 
-  return to ? (
-    <Link to={to} className="block h-full no-underline transition-transform hover:-translate-y-0.5">
-      {card}
-    </Link>
-  ) : (
-    card
+function SectionIntro({ eyebrow, title, copy }: { eyebrow: string; title: string; copy: string }) {
+  return (
+    <div className="mb-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">{eyebrow}</p>
+      <h2 className="mt-1 text-xl font-semibold text-[#13334F]">{title}</h2>
+      <p className="mt-1 max-w-4xl text-sm leading-6 text-[#607583]">{copy}</p>
+    </div>
   );
 }
 
@@ -66,18 +52,13 @@ function MarketplaceEngine({ summary }: { summary: AdminMarketplaceSummary }) {
   const people = summary.workerCount + summary.providerCount;
   return (
     <section>
-      <div className="mb-3">
-        <h2 className="text-base font-semibold text-[#13334F]">Marketplace engine</h2>
-        <p className="mt-1 text-sm text-[#607583]">
-          Are people entering, booking, completing work, and leaving a reliable record behind?
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="People" value={people} detail={`${summary.workerCount} workers · ${summary.providerCount} provider organizations`} icon={Users} to="/admin/users" />
-        <MetricCard label="Open shifts" value={summary.openShiftCount} detail={`${summary.bookedShiftCount} shifts currently booked or further along`} icon={CalendarCheck} to="/admin/marketplace" />
-        <MetricCard label="Bookings" value={summary.bookingCount} detail="Confirmed marketplace relationships recorded in Covre" icon={Building2} to="/admin/marketplace" />
-        <MetricCard label="Approved work" value={summary.approvedTimesheetCount} detail={`${summary.submittedTimesheetCount} timesheets still awaiting a provider decision`} icon={ClipboardCheck} to="/admin/payments" />
-      </div>
+      <SectionIntro eyebrow="Marketplace" title="Is the engine moving?" copy="Follow people entering the marketplace, work getting booked, and completed shifts leaving an approved operational record behind." />
+      <MetricRail items={[
+        { label: 'People', value: people, detail: `${summary.workerCount} workers · ${summary.providerCount} provider organizations`, to: '/admin/users' },
+        { label: 'Open shifts', value: summary.openShiftCount, detail: `${summary.bookedShiftCount} shifts booked or further along`, to: '/admin/marketplace' },
+        { label: 'Bookings', value: summary.bookingCount, detail: 'Confirmed worker/provider relationships recorded in Covre', to: '/admin/marketplace' },
+        { label: 'Approved work', value: summary.approvedTimesheetCount, detail: `${summary.submittedTimesheetCount} submitted timesheets still awaiting decision`, to: '/admin/payments' },
+      ]} />
     </section>
   );
 }
@@ -85,21 +66,23 @@ function MarketplaceEngine({ summary }: { summary: AdminMarketplaceSummary }) {
 function ContinuitySignals({ summary }: { summary: AdminContinuitySummary }) {
   return (
     <section>
-      <div className="mb-3">
-        <h2 className="text-base font-semibold text-[#13334F]">Continuity + durable relationships</h2>
-        <p className="mt-1 max-w-4xl text-sm text-[#607583]">
-          What remains after a shift: familiarity, repeated trust, and work that becomes easier to return to.
-          These signals come from approved work history, not self-awarded community scores.
-        </p>
+      <SectionIntro eyebrow="Continuity" title="Is repeat work becoming an advantage?" copy="Approved work history should make Covre more useful over time: more familiar places, more repeated relationships, and less starting from zero." />
+      <div className="grid gap-x-7 gap-y-5 border-y border-[#DDE7E8] py-5 sm:grid-cols-2 xl:grid-cols-5">
+        {[
+          ['Workers with history', summary.workersWithHistory, 'At least one approved work event'],
+          ['Repeat-site workers', summary.repeatSiteWorkers, 'Returned to at least one care site'],
+          ['Familiar site ties', summary.familiarWorkerSiteTies, 'Worker + site relationships with 2+ approved shifts'],
+          ['Repeat provider ties', summary.repeatProviderWorkerTies, 'Worker + provider relationships with 2+ approved shifts'],
+          ['Returning work share', `${summary.returningWorkSharePct}%`, 'Approved work beyond the first shift in an existing worker/site relationship'],
+        ].map(([label, value, detail]) => (
+          <div key={label as string}>
+            <p className="text-2xl font-semibold tracking-[-0.03em] text-[#13334F]">{value}</p>
+            <p className="mt-1 text-sm font-semibold text-[#13334F]">{label}</p>
+            <p className="mt-1 text-xs leading-5 text-[#607583]">{detail}</p>
+          </div>
+        ))}
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <MetricCard label="Workers with history" value={summary.workersWithHistory} detail="Workers with at least one approved work event" icon={Users} accent />
-        <MetricCard label="Repeat-site workers" value={summary.repeatSiteWorkers} detail="Workers who have returned to at least one care site" icon={Repeat2} accent />
-        <MetricCard label="Familiar site ties" value={summary.familiarWorkerSiteTies} detail="Worker + site relationships with two or more approved shifts" icon={HeartHandshake} accent />
-        <MetricCard label="Repeat provider ties" value={summary.repeatProviderWorkerTies} detail="Worker + provider relationships with two or more approved shifts" icon={Network} accent />
-        <MetricCard label="Returning work share" value={`${summary.returningWorkSharePct}%`} detail="Approved work beyond the first shift in an already-familiar worker/site relationship" icon={Activity} accent />
-      </div>
-      {summary.sampled ? <p className="mt-3 text-xs text-[#9B6419]">Continuity metrics are calculated from the most recent 5,000 approved work records.</p> : null}
+      {summary.sampled ? <p className="mt-2 text-xs text-[#9B6419]">Calculated from the most recent 5,000 approved work records.</p> : null}
     </section>
   );
 }
@@ -109,55 +92,40 @@ function ContinuityReadinessPanel({ summary }: { summary: AdminContinuityReadine
   const missingCount = Math.max(0, summary.totalCount - summary.readyCount);
 
   return (
-    <section className="rounded-2xl border border-[#DDE7E8] bg-white p-5 shadow-sm">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="max-w-3xl">
-          <div className="flex items-center gap-2">
-            <ServerCog className="h-5 w-5 text-[#2F8E7A]" aria-hidden />
-            <h2 className="text-base font-semibold text-[#13334F]">Continuity readiness</h2>
-          </div>
-          <p className="mt-2 text-sm leading-6 text-[#607583]">
-            Production infrastructure required by Covre’s continuity workflow. This checks database capabilities only—never worker/provider records and never browser-local experiment telemetry.
-          </p>
+    <section>
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#DDE7E8] pb-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Infrastructure</p>
+          <h2 className="mt-1 text-xl font-semibold text-[#13334F]">Continuity readiness</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[#607583]">Checks the database capabilities required by Covre’s continuity workflow—not worker records, provider records, or browser-local experiment data.</p>
         </div>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${fullyReady ? 'bg-[#E6F6F2] text-[#257665]' : 'bg-[#FFF4E0] text-[#9B6419]'}`}>
-          {summary.diagnosticAvailable
-            ? fullyReady
-              ? `${summary.readyCount}/${summary.totalCount} ready`
-              : `${missingCount} missing · ${summary.readyCount}/${summary.totalCount} ready`
-            : 'Mock mode · not checked'}
-        </span>
+        <div className="text-right">
+          <p className={`text-2xl font-semibold ${fullyReady ? 'text-[#257665]' : 'text-[#9B6419]'}`}>
+            {summary.diagnosticAvailable ? `${summary.readyCount}/${summary.totalCount}` : '—'}
+          </p>
+          <p className="text-xs text-[#607583]">{summary.diagnosticAvailable ? (fullyReady ? 'capabilities ready' : `${missingCount} missing`) : 'not checked in mock mode'}</p>
+        </div>
       </div>
 
       {!summary.diagnosticAvailable ? (
-        <div className="mt-4 rounded-xl border border-[#DDE7E8] bg-[#F7FAFA] p-4 text-sm text-[#607583]">
-          Database readiness cannot be verified in mock mode. Switch Covre to its Supabase backend and sign in as an admin to run the diagnostic.
-        </div>
+        <p className="border-b border-[#DDE7E8] py-4 text-sm leading-6 text-[#607583]">Database readiness cannot be verified in mock mode. The diagnostic becomes meaningful when Covre is connected to its own Supabase project and an admin is signed in.</p>
       ) : (
-        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+        <div className="border-b border-[#DDE7E8]">
           {summary.items.map(item => (
-            <div key={item.key} className={`rounded-xl border p-4 ${item.ready ? 'border-[#BFDCD5] bg-[#F3FBF9]' : 'border-[#F4D39C] bg-[#FFF9EF]'}`}>
-              <div className="flex items-start gap-3">
-                {item.ready ? <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#2F8E7A]" aria-hidden /> : <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#9B6419]" aria-hidden />}
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-[#13334F]">{item.label}</p>
-                    <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-[#607583]">{item.kind}</span>
-                  </div>
-                  <p className="mt-1 break-all text-xs text-[#607583]">{item.migration}</p>
-                  <p className={`mt-2 text-xs font-semibold ${item.ready ? 'text-[#257665]' : 'text-[#9B6419]'}`}>{item.ready ? 'Available in connected database' : 'Not detected in connected database'}</p>
-                </div>
+            <div key={item.key} className="grid gap-3 border-b border-[#EEF3F4] py-4 last:border-b-0 md:grid-cols-[1.3fr_0.7fr_1.5fr_auto] md:items-center">
+              <div className="flex items-center gap-3">
+                {item.ready ? <CheckCircle2 className="h-5 w-5 shrink-0 text-[#2F8E7A]" aria-hidden /> : <CircleAlert className="h-5 w-5 shrink-0 text-[#9B6419]" aria-hidden />}
+                <p className="font-semibold text-[#13334F]">{item.label}</p>
               </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#607583]">{item.kind}</p>
+              <p className="break-all font-mono text-xs text-[#607583]">{item.migration}</p>
+              <p className={`text-xs font-semibold ${item.ready ? 'text-[#257665]' : 'text-[#9B6419]'}`}>{item.ready ? 'Available' : 'Missing'}</p>
             </div>
           ))}
         </div>
       )}
 
-      {summary.diagnosticAvailable ? (
-        <p className="mt-4 text-xs text-[#9AAAB3]">
-          Checked {new Date(summary.checkedAt).toLocaleString()}. This reports capability presence, not whether a migration-history table contains a particular filename.
-        </p>
-      ) : null}
+      {summary.diagnosticAvailable ? <p className="mt-2 text-xs text-[#9AAAB3]">Checked {new Date(summary.checkedAt).toLocaleString()}. Capability presence only; this does not inspect migration filenames.</p> : null}
     </section>
   );
 }
@@ -165,22 +133,14 @@ function ContinuityReadinessPanel({ summary }: { summary: AdminContinuityReadine
 function ExperimentSignals({ summary }: { summary: ContinuityTelemetrySummary }) {
   return (
     <section>
-      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-[#13334F]">Continuity experiment</h2>
-          <p className="mt-1 max-w-4xl text-sm text-[#607583]">
-            Are the new continuity surfaces changing behavior? This first telemetry seam records only small product-event context such as shift/site IDs and counts—no message contents or sensitive profile data.
-          </p>
-        </div>
-        <span className="rounded-full bg-[#E8EEF2] px-3 py-1 text-xs font-semibold text-[#607583]">Preview telemetry · this browser</span>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard label="Familiar impressions" value={summary.familiarOpportunityImpressions} detail={`${summary.familiarOpportunityOpenRatePct}% opened from a surfaced familiar opportunity`} icon={Activity} accent />
-        <MetricCard label="Familiar opens" value={summary.familiarOpportunityOpens} detail={`${summary.familiarShiftDetailViews} familiar shift-detail views recorded`} icon={MousePointerClick} accent />
-        <MetricCard label="Familiar applications" value={summary.familiarShiftApplications} detail={`${summary.familiarApplicationRatePct}% of familiar detail views led to an application event`} icon={CalendarCheck} accent />
-        <MetricCard label="Return preferences" value={summary.returnPreferencesSaved} detail={`${summary.providerRebookActions} provider rebook actions · ${summary.providerReturnIntents} return intents`} icon={HeartHandshake} accent />
-      </div>
-      <p className="mt-3 text-xs text-[#9AAAB3]">This is not cross-user production analytics yet. Events are capped and stored locally until Covre has an approved analytics persistence contract.</p>
+      <SectionIntro eyebrow="Preview experiment" title="Are continuity surfaces changing behavior?" copy="This browser-local seam records small product-event context such as IDs and counts. It is not cross-user production analytics and does not store message contents or sensitive profile data." />
+      <MetricRail items={[
+        { label: 'Familiar impressions', value: summary.familiarOpportunityImpressions, detail: `${summary.familiarOpportunityOpenRatePct}% opened from a surfaced familiar opportunity` },
+        { label: 'Familiar opens', value: summary.familiarOpportunityOpens, detail: `${summary.familiarShiftDetailViews} familiar shift-detail views` },
+        { label: 'Familiar applications', value: summary.familiarShiftApplications, detail: `${summary.familiarApplicationRatePct}% of familiar detail views led to an application event` },
+        { label: 'Return preferences', value: summary.returnPreferencesSaved, detail: `${summary.providerRebookActions} provider rebook actions · ${summary.providerReturnIntents} return intents` },
+      ]} />
+      <p className="mt-2 text-xs text-[#9AAAB3]">Events are capped and stored locally until Covre has an approved analytics persistence contract.</p>
     </section>
   );
 }
@@ -191,55 +151,38 @@ export default function AdminOperations() {
   const continuity = useAsyncResource(() => getAdminContinuitySummary(), []);
   const readiness = useAsyncResource(() => getAdminContinuityReadiness(), []);
   const experiment = getContinuityTelemetrySummary();
-
   const loading = marketplace.loading || continuity.loading;
   const error = marketplace.error ?? continuity.error;
 
   return (
     <div className="min-h-full bg-[#F7FAFA]">
       <header className="border-b border-[#DDE7E8] bg-white px-6 py-6">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-4">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-5">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">Covre control center</p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-tight text-[#13334F]">Operations + Continuity</h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#607583]">Marketplace truth beside the durable value Covre is trying to create: reliable work, familiar places, repeat relationships, and a reason to keep building here.</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Control</p>
+            <h1 className="mt-1 text-3xl font-semibold text-[#13334F]">Operations + continuity</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#607583]">One control surface for marketplace movement, infrastructure readiness, and the longer-term question: does using Covre make future work easier?</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to="/admin" className="rounded-xl border border-[#DDE7E8] bg-white px-4 py-2.5 text-sm font-semibold text-[#13334F] no-underline hover:bg-[#F7FAFA]">Overview</Link>
-            <Link to="/admin/full-app" className="rounded-xl bg-[#13334F] px-4 py-2.5 text-sm font-semibold text-white no-underline hover:bg-[#0B243A]">Full App</Link>
+          <div className="flex gap-5 text-sm font-semibold">
+            <Link to="/admin" className="text-[#607583] no-underline hover:text-[#13334F]">Overview</Link>
+            <Link to="/admin/full-app" className="text-[#2F8E7A] no-underline hover:text-[#257665]">Inspect full app →</Link>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-8 p-6">
-        {!supabaseMode ? <div className="rounded-xl border border-[#DDE7E8] bg-[#E8EEF2] px-4 py-3 text-sm text-[#607583]">Mock mode is active. Marketplace metrics are demo values; readiness is not a database check; experiment telemetry below reflects actions in this browser.</div> : null}
+      <main className="mx-auto max-w-7xl space-y-10 p-6">
+        {!supabaseMode ? <p className="border-b border-[#DDE7E8] pb-4 text-xs leading-5 text-[#607583]"><strong className="font-semibold text-[#9B6419]">Preview mode.</strong> Marketplace values are demo data, readiness is not a live database check, and experiment telemetry reflects this browser only.</p> : null}
 
-        {readiness.loading ? (
-          <section className="rounded-2xl border border-[#DDE7E8] bg-white p-5 text-sm text-[#607583] shadow-sm">Checking continuity infrastructure…</section>
-        ) : readiness.error ? (
-          <section className="rounded-2xl border border-[#F4A83D] bg-[#FFF4E0] p-5">
-            <div className="flex items-start gap-3">
-              <CircleAlert className="mt-0.5 h-5 w-5 shrink-0 text-[#9B6419]" aria-hidden />
-              <div>
-                <h2 className="font-semibold text-[#13334F]">Continuity readiness could not be checked.</h2>
-                <p className="mt-1 text-sm text-[#9B6419]">{readiness.error.message}</p>
-                <button type="button" onClick={readiness.reload} className="mt-3 rounded-lg bg-[#13334F] px-4 py-2 text-sm font-semibold text-white">Retry diagnostic</button>
-              </div>
-            </div>
-          </section>
-        ) : readiness.data ? <ContinuityReadinessPanel summary={readiness.data} /> : null}
+        {readiness.loading ? <QueueMessage>Checking continuity infrastructure…</QueueMessage> : readiness.error ? <QueueError message={readiness.error.message} onRetry={readiness.reload} /> : readiness.data ? <ContinuityReadinessPanel summary={readiness.data} /> : null}
 
         {loading ? (
-          <div className="rounded-2xl border border-[#DDE7E8] bg-white p-8 text-center text-sm text-[#607583]">Loading operations and continuity signals…</div>
+          <QueueMessage>Loading marketplace and continuity signals…</QueueMessage>
         ) : error ? (
-          <div className="rounded-2xl border border-[#F4A83D] bg-[#FFF4E0] p-5">
-            <p className="font-semibold text-[#13334F]">Some control-center metrics could not load.</p>
-            <p className="mt-2 text-sm text-[#9B6419]">{error.message}</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button type="button" onClick={marketplace.reload} className="rounded-lg bg-[#13334F] px-4 py-2 text-sm font-semibold text-white">Retry marketplace</button>
-              <button type="button" onClick={continuity.reload} className="rounded-lg border border-[#DDE7E8] bg-white px-4 py-2 text-sm font-semibold text-[#13334F]">Retry continuity</button>
-            </div>
-          </div>
+          <section className="border-y border-[#DDE7E8] py-5">
+            <p className="font-semibold text-[#13334F]">Some control-center signals could not load.</p>
+            <p className="mt-1 text-sm text-[#607583]">{error.message}</p>
+            <div className="mt-3 flex gap-4 text-sm font-semibold"><button type="button" onClick={marketplace.reload} className="text-[#2F8E7A]">Retry marketplace</button><button type="button" onClick={continuity.reload} className="text-[#607583]">Retry continuity</button></div>
+          </section>
         ) : (
           <>
             {marketplace.data ? <MarketplaceEngine summary={marketplace.data.summary} /> : null}
@@ -249,17 +192,25 @@ export default function AdminOperations() {
 
         <ExperimentSignals summary={experiment} />
 
-        <section className="rounded-2xl border border-[#DDE7E8] bg-white p-5 shadow-sm">
-          <div className="flex flex-wrap items-start justify-between gap-4">
+        <section className="border-y border-[#DDE7E8] py-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Retention test</p>
+          <div className="mt-1 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#2F8E7A]">Retention test</p>
-              <h2 className="mt-1 text-lg font-semibold text-[#13334F]">Is tenure making Covre more valuable?</h2>
-              <p className="mt-2 max-w-4xl text-sm leading-6 text-[#607583]">Use this view to ask whether repeat work is creating familiarity and durable relationships—not merely whether booking volume is rising. A five-year Covre worker should have more useful history, trust, and familiar places than a five-week worker.</p>
+              <h2 className="text-xl font-semibold text-[#13334F]">Is tenure making Covre more valuable?</h2>
+              <p className="mt-1 max-w-4xl text-sm leading-6 text-[#607583]">A five-year Covre worker should have more useful history, trust, and familiar places than a five-week worker. Repeat volume alone is not enough.</p>
             </div>
-            <Link to="/admin/full-app" className="text-sm font-semibold text-[#2F8E7A] underline decoration-[#53B59F] underline-offset-4">Inspect product surfaces →</Link>
+            <Link to="/admin/full-app" className="text-sm font-semibold text-[#2F8E7A] no-underline">Inspect product surfaces →</Link>
           </div>
         </section>
       </main>
     </div>
   );
+}
+
+function QueueMessage({ children }: { children: ReactNode }) {
+  return <div className="border-y border-[#DDE7E8] py-7 text-sm text-[#607583]">{children}</div>;
+}
+
+function QueueError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return <div className="border-y border-[#DDE7E8] py-6"><p className="font-semibold text-[#13334F]">Continuity readiness could not be checked.</p><p className="mt-1 text-sm text-[#607583]">{message}</p><button type="button" onClick={onRetry} className="mt-3 text-sm font-semibold text-[#2F8E7A]">Retry diagnostic</button></div>;
 }
