@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { CheckCircle2, CircleAlert } from 'lucide-react';
 import { useAsyncResource } from '../../hooks/useAsyncResource';
