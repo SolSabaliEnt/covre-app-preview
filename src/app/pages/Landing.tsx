@@ -1,14 +1,12 @@
+import type { ReactNode } from 'react';
 import {
-  Activity,
   ArrowRight,
   BadgeCheck,
   Building2,
   Check,
-  CheckCircle2,
   ChevronRight,
   ClipboardCheck,
   FileCheck2,
-  HeartHandshake,
   HeartPulse,
   MapPin,
   ShieldCheck,
@@ -34,51 +32,21 @@ const careSettings = [
   'Behavioral health',
 ];
 
-const coverageFlow = [
-  {
-    label: 'Shift posted',
-    detail: 'Role, rate, timing, credentials, site instructions',
-    icon: ClipboardCheck,
-  },
-  {
-    label: 'Worker matched',
-    detail: 'Readiness, history, familiarity, availability',
-    icon: UserRoundCheck,
-  },
-  {
-    label: 'Work completed',
-    detail: 'Arrival, time, support, closeout',
-    icon: Stethoscope,
-  },
-  {
-    label: 'Record carried forward',
-    detail: 'Approved history becomes useful context next time',
-    icon: HeartPulse,
-  },
-];
-
-const workerPassport = [
-  ['Credentials', 'Ready'],
-  ['Work history', '12 approved shifts'],
-  ['Familiar sites', '3 care settings'],
-  ['Availability', 'Updated today'],
-];
-
-const providerSignals = [
-  ['Credential fit', 'Ready'],
-  ['Site familiarity', 'Worked here before'],
-  ['Recent reliability', '4 completed shifts'],
-  ['Arrival context', 'Parking + entry visible'],
+const careRecord = [
+  { label: 'Shift context', detail: 'Role, rate, timing, level of care', icon: ClipboardCheck },
+  { label: 'Professional readiness', detail: 'Credentials, history, familiarity', icon: UserRoundCheck },
+  { label: 'On-site context', detail: 'Arrival, contacts, expectations', icon: MapPin },
+  { label: 'Approved history', detail: 'Time, completion, repeat relationship', icon: FileCheck2 },
 ];
 
 export default function Landing() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-[#10283D]">
-      <section className="relative min-h-[730px] overflow-hidden bg-[#13334F] text-white sm:min-h-[770px] lg:min-h-[790px]">
+      <section className="relative min-h-[720px] overflow-hidden bg-[#13334F] text-white sm:min-h-[760px] lg:min-h-[790px]">
         <video
           src="/covre-header-background-web.mp4"
           poster="/covre-header-poster.jpg"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center lg:object-[62%_center]"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center lg:object-[64%_center]"
           autoPlay
           muted
           loop
@@ -87,55 +55,41 @@ export default function Landing() {
           aria-hidden="true"
           tabIndex={-1}
         />
-        <div className="pointer-events-none absolute inset-0 bg-[#0B243A]/48" />
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,36,58,0.97)_0%,rgba(11,36,58,0.91)_38%,rgba(11,36,58,0.52)_67%,rgba(11,36,58,0.24)_100%)]" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-[#0B243A]/78 to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-[#0B243A]/36" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(11,36,58,0.98)_0%,rgba(11,36,58,0.88)_39%,rgba(11,36,58,0.42)_67%,rgba(11,36,58,0.12)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#0B243A]/72 to-transparent" />
 
-        <div className="relative z-10 mx-auto flex min-h-[730px] max-w-7xl flex-col px-5 pb-9 pt-5 sm:min-h-[770px] sm:px-6 lg:min-h-[790px] lg:pb-12 lg:pt-6">
+        <div className="relative z-10 mx-auto flex min-h-[720px] max-w-7xl flex-col px-5 pb-9 pt-5 sm:min-h-[760px] sm:px-6 lg:min-h-[790px] lg:pb-11 lg:pt-6">
           <header className="flex items-center justify-between gap-4">
             <Link to="/" className="block min-w-0 shrink">
-              <img
-                src={LANDING_LOGO_SRC}
-                alt="Covre"
-                width={906}
-                height={209}
-                loading="eager"
-                decoding="async"
-                className={LANDING_LOGO_HERO_CLASS}
-              />
+              <img src={LANDING_LOGO_SRC} alt="Covre" width={906} height={209} loading="eager" decoding="async" className={LANDING_LOGO_HERO_CLASS} />
             </Link>
 
             <nav className="hidden items-center gap-8 text-sm font-medium text-white/72 md:flex" aria-label="Primary">
-              <a href="#care-loop" className="transition-colors hover:text-white">Care loop</a>
+              <a href="#care-record" className="transition-colors hover:text-white">Care record</a>
               <a href="#providers" className="transition-colors hover:text-white">Providers</a>
               <a href="#workers" className="transition-colors hover:text-white">Care professionals</a>
             </nav>
 
             <div className="flex shrink-0 items-center gap-2">
-              <Link to="/auth" className="hidden min-h-11 items-center justify-center px-4 text-sm font-semibold text-white/90 hover:text-white sm:inline-flex">
-                Log in
-              </Link>
-              <Link to={PROVIDER_ENTRY_PATH} className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-[#13334F] sm:px-5">
-                Facility access
-              </Link>
+              <Link to="/auth" className="hidden min-h-11 items-center justify-center px-4 text-sm font-semibold text-white/90 hover:text-white sm:inline-flex">Log in</Link>
+              <Link to={PROVIDER_ENTRY_PATH} className="inline-flex min-h-11 items-center justify-center rounded-full bg-white px-4 text-sm font-semibold text-[#13334F] sm:px-5">Facility access</Link>
             </div>
           </header>
 
-          <div className="grid flex-1 items-center gap-10 py-14 lg:grid-cols-[1.08fr_0.72fr] lg:gap-16 lg:py-16">
+          <div className="flex flex-1 items-center py-16 sm:py-20 lg:py-24">
             <div className="max-w-[760px]">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#B7E4DA]">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#B7E4DA]">
                 <HeartPulse className="h-4 w-4" aria-hidden />
-                Care coverage, connected
+                Care staffing, with memory
               </div>
 
-              <h1 className="mt-6 text-[3.15rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-[5rem]">
-                Fill the shift.
-                <br />
-                Keep the care context.
+              <h1 className="mt-6 max-w-[720px] text-[3.1rem] font-semibold leading-[0.96] tracking-[-0.055em] text-white sm:text-6xl lg:text-[5rem]">
+                Coverage should feel like part of the care plan.
               </h1>
 
-              <p className="mt-7 max-w-2xl text-lg leading-8 text-white/80 sm:text-xl">
-                Covre connects staffing, credentials, site context, and work history so providers and care professionals can make better decisions before the shift starts.
+              <p className="mt-7 max-w-[650px] text-lg leading-8 text-white/80 sm:text-xl">
+                Covre connects an open shift to the professional, credentials, site knowledge, and approved work history that make the decision safer and more informed.
               </p>
 
               <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -146,53 +100,20 @@ export default function Landing() {
                   Find care shifts <ChevronRight className="h-5 w-5" aria-hidden />
                 </Link>
               </div>
-
-              <div className="mt-9 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/68">
-                <TrustPoint icon={<BadgeCheck className="h-4 w-4" />} text="Credential-aware" />
-                <TrustPoint icon={<MapPin className="h-4 w-4" />} text="Site-ready context" />
-                <TrustPoint icon={<FileCheck2 className="h-4 w-4" />} text="Connected work history" />
-              </div>
-            </div>
-
-            <div className="hidden lg:block">
-              <div className="ml-auto max-w-[360px] rounded-[28px] border border-white/18 bg-[#F7FAFA]/94 p-5 text-[#10283D] shadow-[0_24px_70px_rgba(0,0,0,0.16)] backdrop-blur-md">
-                <div className="flex items-start justify-between gap-4 border-b border-[#DDE7E8] pb-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Care coverage</p>
-                    <p className="mt-1 text-xl font-semibold text-[#13334F]">Tonight · Memory care</p>
-                    <p className="mt-1 text-sm text-[#607583]">CNA · 7 PM–7 AM</p>
-                  </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#257665]"><Stethoscope className="h-5 w-5" /></span>
-                </div>
-                <div className="py-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#2F8E7A]">Matched professional</p>
-                  <div className="mt-3 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#13334F] text-sm font-bold text-white">MR</div>
-                    <div>
-                      <p className="font-semibold text-[#13334F]">CNA · credential ready</p>
-                      <p className="mt-0.5 text-xs text-[#607583]">3 shifts at this site</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-x-5 border-t border-[#DDE7E8] pt-4 text-sm">
-                  <MiniSignal label="Credentials" value="Ready" />
-                  <MiniSignal label="Site history" value="Familiar" />
-                  <MiniSignal label="Arrival" value="Instructions set" />
-                  <MiniSignal label="Status" value="Awaiting confirm" />
-                </div>
-              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 border-t border-white/14 pt-5 text-xs font-medium text-white/58 sm:text-sm">
-            <span className="h-2 w-2 rounded-full bg-[#7BD0BD]" />
-            The shift is temporary. The care record should not be.
+          <div className="grid gap-3 border-t border-white/14 pt-5 text-xs text-white/64 sm:grid-cols-4 sm:text-sm">
+            <TrustPoint icon={<BadgeCheck className="h-4 w-4" />} text="Credential-aware" />
+            <TrustPoint icon={<MapPin className="h-4 w-4" />} text="Site familiarity" />
+            <TrustPoint icon={<ShieldCheck className="h-4 w-4" />} text="Approved work history" />
+            <TrustPoint icon={<Stethoscope className="h-4 w-4" />} text="Arrival context" />
           </div>
         </div>
       </section>
 
       <section className="border-b border-[#DDE7E8] bg-white">
-        <div className="mx-auto grid max-w-7xl gap-4 px-5 py-5 text-sm text-[#607583] sm:px-6 md:grid-cols-[1fr_auto] md:items-center">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-5 text-sm text-[#607583] sm:px-6 md:flex-row md:items-center md:justify-between">
           <span>Built for teams delivering hands-on care</span>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-semibold uppercase tracking-[0.09em] text-[#314858]">
             <span>CNAs</span><span>DSPs</span><span>LPNs</span><span>RNs</span><span>Care teams</span>
@@ -200,121 +121,112 @@ export default function Landing() {
         </div>
       </section>
 
-      <section id="care-loop" className="scroll-mt-20 bg-[#F7FAFA] py-20 sm:py-28">
+      <section id="care-record" className="scroll-mt-20 bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-6">
-          <div className="max-w-4xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">The care loop</p>
-            <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">Care staffing should behave more like a health workflow than a job board.</h2>
-            <p className="mt-5 max-w-3xl text-lg leading-8 text-[#607583]">The useful part is not only finding someone. It is carrying the right information from the open shift through the completed work—and making that history useful the next time.</p>
-          </div>
+          <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-24">
+            <div className="max-w-xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">The care coverage record</p>
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">The shift ends. The useful context should not.</h2>
+              <p className="mt-5 text-lg leading-8 text-[#607583]">Instead of treating every opening like a brand-new transaction, Covre carries forward the details that help providers and professionals make the next decision with more confidence.</p>
+            </div>
 
-          <div className="relative mt-12 grid gap-0 border-y border-[#BFCED4] md:grid-cols-4">
-            {coverageFlow.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.label} className={`relative py-6 md:px-6 ${index > 0 ? 'border-t border-[#DDE7E8] md:border-l md:border-t-0' : ''}`}>
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#257665]"><Icon className="h-5 w-5" /></div>
-                  <p className="mt-5 text-xs font-semibold text-[#9AAAB3]">0{index + 1}</p>
-                  <h3 className="mt-1 text-lg font-semibold text-[#13334F]">{step.label}</h3>
-                  <p className="mt-2 text-sm leading-6 text-[#607583]">{step.detail}</p>
-                </div>
-              );
-            })}
+            <div className="border-t border-[#BFCED4]">
+              {careRecord.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.label} className="grid gap-4 border-b border-[#DDE7E8] py-6 sm:grid-cols-[42px_1fr_auto] sm:items-center">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]"><Icon className="h-4.5 w-4.5" /></span>
+                    <div>
+                      <p className="text-lg font-semibold text-[#13334F]">{item.label}</p>
+                      <p className="mt-1 text-sm leading-6 text-[#607583]">{item.detail}</p>
+                    </div>
+                    <span className="text-xs font-semibold tracking-[0.12em] text-[#9AAAB3]">0{index + 1}</span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="workers" className="scroll-mt-20 bg-white py-20 sm:py-28">
-        <div className="mx-auto grid max-w-7xl gap-14 px-5 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:gap-20">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">
-              <Stethoscope className="h-4 w-4" aria-hidden /> For care professionals
+      <section id="workers" className="scroll-mt-20 bg-[#F7FAFA] py-20 sm:py-28">
+        <div className="mx-auto grid max-w-7xl gap-14 px-5 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-24">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">For care professionals</p>
+            <h2 className="mt-4 max-w-2xl text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">Bring your professional history with you.</h2>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-[#607583]">Your credentials, approved work, familiar sites, and current availability should work together as one professional record—not live across texts, screenshots, and repeated forms.</p>
+
+            <div className="mt-10 max-w-2xl border-t border-[#BFCED4]">
+              <SignalRow label="Credential passport" value="Ready" detail="Current qualification status stays attached to your profile." />
+              <SignalRow label="Approved work history" value="12 shifts" detail="Completed work becomes part of your usable record." />
+              <SignalRow label="Familiar care settings" value="3 sites" detail="Return opportunities can recognize real prior experience." />
+              <SignalRow label="Availability" value="Updated today" detail="Providers see current readiness instead of guessing." />
             </div>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">Your professional context should travel with you.</h2>
-            <p className="mt-5 text-lg leading-8 text-[#607583]">Covre is designed around a portable care-work profile: your credentials, approved work history, familiar sites, and the shift details you need before saying yes.</p>
-            <div className="mt-8 space-y-4">
-              <BenefitRow text="Know pay, timing, care setting, arrival details, and expectations before you accept" />
-              <BenefitRow text="Keep credentials and approved work history connected to your profile" />
-              <BenefitRow text="Build familiarity with providers and sites that already know your work" />
-            </div>
+
             <Link to={WORKER_ENTRY_PATH} className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#53B59F] px-5 text-sm font-semibold text-white hover:bg-[#2F8E7A]">
               Open care professional access <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
 
-          <div className="rounded-[32px] bg-[#F7FAFA] p-5 sm:p-7">
-            <div className="flex items-center justify-between border-b border-[#DDE7E8] pb-5">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#13334F] font-bold text-white">MR</div>
-                <div>
-                  <p className="text-lg font-semibold text-[#13334F]">Professional passport</p>
-                  <p className="text-sm text-[#607583]">CNA · profile ready</p>
-                </div>
+          <aside className="border-l-2 border-[#53B59F] pl-6 sm:pl-8 lg:mt-14">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#13334F] font-bold text-white">MR</div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#2F8E7A]">Professional record</p>
+                <p className="mt-1 text-xl font-semibold text-[#13334F]">CNA · profile ready</p>
               </div>
-              <ShieldCheck className="h-6 w-6 text-[#2F8E7A]" aria-hidden />
             </div>
-            <div className="divide-y divide-[#DDE7E8]">
-              {workerPassport.map(([label, value]) => <InfoRow key={label} label={label} value={value} />)}
-            </div>
-            <div className="mt-5 flex items-center gap-2 text-xs font-semibold text-[#257665]"><CheckCircle2 className="h-4 w-4" /> Ready to review for matching shifts</div>
-          </div>
+            <p className="mt-6 text-2xl font-semibold leading-8 text-[#13334F]">“I shouldn’t have to prove who I am from scratch every time I pick up a shift.”</p>
+            <p className="mt-5 text-sm leading-6 text-[#607583]">Covre is designed so trusted work compounds: credentials stay connected, history becomes visible, and familiar sites can recognize a returning professional.</p>
+          </aside>
         </div>
       </section>
 
       <section id="providers" className="scroll-mt-20 bg-[#E6F6F2] py-20 sm:py-28">
-        <div className="mx-auto grid max-w-7xl gap-14 px-5 sm:px-6 lg:grid-cols-[1.06fr_0.94fr] lg:items-center lg:gap-20">
-          <div className="rounded-[32px] bg-white/76 p-5 sm:p-7">
-            <div className="flex items-start justify-between gap-6 border-b border-[#BFDCD5] pb-5">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#607583]">Coverage decision</p>
-                <h3 className="mt-2 text-2xl font-semibold text-[#13334F]">Memory care · Overnight</h3>
-                <p className="mt-1 text-sm text-[#607583]">CNA · 7 PM–7 AM · site requirements attached</p>
-              </div>
-              <Building2 className="h-6 w-6 text-[#2F8E7A]" aria-hidden />
+        <div className="mx-auto max-w-7xl px-5 sm:px-6">
+          <div className="grid gap-14 lg:grid-cols-[0.82fr_1.18fr] lg:gap-24">
+            <div className="max-w-xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#257665]">For providers</p>
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">See the care-relevant signals before you confirm.</h2>
+              <p className="mt-5 text-lg leading-8 text-[#466170]">Coverage is not just a name against a schedule. Covre is built to bring readiness, familiarity, arrival details, and recent work history into the staffing decision.</p>
+              <Link to={PROVIDER_ENTRY_PATH} className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white hover:bg-[#0B243A]">
+                Open provider access <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
             </div>
-            <div className="divide-y divide-[#BFDCD5]">
-              {providerSignals.map(([label, value]) => <InfoRow key={label} label={label} value={value} />)}
-            </div>
-            <div className="mt-5 flex items-center justify-between gap-4 border-t border-[#BFDCD5] pt-5">
-              <div>
-                <p className="text-xs text-[#607583]">Matched professional</p>
-                <p className="mt-1 font-semibold text-[#13334F]">CNA · returning worker</p>
-              </div>
-              <span className="text-sm font-semibold text-[#257665]">Review fit</span>
-            </div>
-          </div>
 
-          <div className="max-w-xl lg:justify-self-end">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#257665]">
-              <Building2 className="h-4 w-4" aria-hidden /> For providers
+            <div className="border-t border-[#9FCFC3]">
+              <div className="flex flex-wrap items-end justify-between gap-4 border-b border-[#9FCFC3] py-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#607583]">Coverage decision</p>
+                  <h3 className="mt-1 text-2xl font-semibold text-[#13334F]">Memory care · Overnight CNA</h3>
+                  <p className="mt-1 text-sm text-[#607583]">Tonight · 7 PM–7 AM · site requirements attached</p>
+                </div>
+                <span className="text-sm font-semibold text-[#257665]">Returning professional</span>
+              </div>
+              <DecisionRow label="Credential fit" value="Ready" note="Required items active for this shift" />
+              <DecisionRow label="Site familiarity" value="Worked here before" note="3 approved shifts at this site" />
+              <DecisionRow label="Recent reliability" value="4 completed shifts" note="Approved work history visible" />
+              <DecisionRow label="Arrival context" value="Ready" note="Parking, entry, and site contact attached" />
+              <div className="flex items-center justify-between gap-4 border-b border-[#9FCFC3] py-5">
+                <span className="text-sm text-[#607583]">Decision state</span>
+                <span className="text-sm font-semibold text-[#13334F]">Ready to review fit</span>
+              </div>
             </div>
-            <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">See readiness before the person arrives.</h2>
-            <p className="mt-5 text-lg leading-8 text-[#466170]">Covre gives the shift more clinical context: credential fit, site familiarity, work history, arrival details, and a connected closeout record.</p>
-            <div className="mt-8 space-y-4">
-              <BenefitRow text="Post the real care setting, requirements, timing, and site expectations" />
-              <BenefitRow text="Review readiness and familiarity instead of sorting a pile of generic applicants" />
-              <BenefitRow text="Approve time and keep the completed shift connected to future staffing decisions" />
-            </div>
-            <Link to={PROVIDER_ENTRY_PATH} className="mt-9 inline-flex min-h-12 items-center gap-2 rounded-xl bg-[#13334F] px-5 text-sm font-semibold text-white hover:bg-[#0B243A]">
-              Open provider access <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
           </div>
         </div>
       </section>
 
       <section className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-5 sm:px-6">
-          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+          <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-24">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Continuity becomes signal</p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">The second good shift should be easier than the first.</h2>
-              <p className="mt-5 text-lg leading-8 text-[#607583]">Covre is built to remember the parts of care staffing worth remembering: approved work, familiar sites, trusted relationships, and what made a shift go well.</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Continuity compounds</p>
+              <h2 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-5xl">A good shift should make the next one easier.</h2>
             </div>
-
             <div className="border-t border-[#BFCED4]">
-              <ContinuityRow icon={<ShieldCheck className="h-5 w-5" />} title="Credential continuity" body="A professional should not have to restart the proof process for every opportunity." />
-              <ContinuityRow icon={<HeartHandshake className="h-5 w-5" />} title="Relationship continuity" body="Workers and care sites with real history should be easier to bring back together." />
-              <ContinuityRow icon={<Activity className="h-5 w-5" />} title="Operational continuity" body="Approved work should improve the next matching, staffing, and closeout decision." last />
+              <ContinuityRow title="Credential continuity" body="A professional does not restart the readiness process for every opportunity." />
+              <ContinuityRow title="Relationship continuity" body="Workers and care sites with real approved history are easier to bring back together." />
+              <ContinuityRow title="Operational continuity" body="Completed work improves matching, staffing, and closeout decisions the next time." />
             </div>
           </div>
         </div>
@@ -325,7 +237,7 @@ export default function Landing() {
           <div className="flex flex-col gap-7 border-b border-[#BFCED4] pb-8 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <p className="text-sm font-semibold uppercase tracking-[0.15em] text-[#2F8E7A]">Care settings</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-[#13334F] sm:text-4xl">Built for the settings where coverage and continuity both matter.</h2>
+              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] text-[#13334F] sm:text-4xl">Built for settings where staffing context changes the care experience.</h2>
             </div>
             <Link to={PROVIDER_ENTRY_PATH} className="inline-flex items-center gap-1 text-sm font-semibold text-[#2F8E7A]">Facility access <ChevronRight className="h-4 w-4" aria-hidden /></Link>
           </div>
@@ -335,16 +247,19 @@ export default function Landing() {
         </div>
       </section>
 
-      <section className="bg-[#13334F] py-20 text-white sm:py-24">
-        <div className="mx-auto max-w-5xl px-5 text-center sm:px-6">
-          <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-[#9EDDD0]">
-            <HeartPulse className="h-4 w-4" aria-hidden /> Care staffing. Covered.
+      <section className="bg-white py-20 sm:py-24">
+        <div className="mx-auto grid max-w-7xl gap-0 overflow-hidden px-5 sm:px-6 lg:grid-cols-2">
+          <div className="bg-[#13334F] p-8 text-white sm:p-10 lg:p-12">
+            <Building2 className="h-6 w-6 text-[#9EDDD0]" aria-hidden />
+            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.15em] text-[#9EDDD0]">Provider</p>
+            <h2 className="mt-3 max-w-lg text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">Need coverage with more context attached?</h2>
+            <Link to={PROVIDER_ENTRY_PATH} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white">Enter provider access <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          <h2 className="mx-auto mt-5 max-w-3xl text-4xl font-semibold tracking-[-0.045em] text-white sm:text-5xl lg:text-6xl">A better staffing decision starts with better care context.</h2>
-          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/65">Choose your side of the care loop and enter Covre with the information you need already attached to the work.</p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link to={PROVIDER_ENTRY_PATH} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-[#53B59F] px-6 text-base font-semibold text-white hover:bg-[#2F8E7A]">I manage care coverage <ArrowRight className="h-5 w-5" aria-hidden /></Link>
-            <Link to={WORKER_ENTRY_PATH} className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-white/25 px-6 text-base font-semibold text-white hover:bg-white/5">I&apos;m a care professional <ChevronRight className="h-5 w-5" aria-hidden /></Link>
+          <div className="bg-[#E6F6F2] p-8 sm:p-10 lg:p-12">
+            <Stethoscope className="h-6 w-6 text-[#257665]" aria-hidden />
+            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.15em] text-[#257665]">Care professional</p>
+            <h2 className="mt-3 max-w-lg text-3xl font-semibold tracking-[-0.04em] text-[#13334F] sm:text-4xl">Want your professional record to work harder for you?</h2>
+            <Link to={WORKER_ENTRY_PATH} className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-[#13334F]">Enter care professional access <ArrowRight className="h-4 w-4" /></Link>
           </div>
         </div>
       </section>
@@ -367,36 +282,34 @@ export default function Landing() {
   );
 }
 
-function TrustPoint({ icon, text }: { icon: React.ReactNode; text: string }) {
+function TrustPoint({ icon, text }: { icon: ReactNode; text: string }) {
   return <div className="flex items-center gap-2"><span className="text-[#7BD0BD]">{icon}</span><span>{text}</span></div>;
 }
 
-function MiniSignal({ label, value }: { label: string; value: string }) {
-  return <div className="py-2"><p className="text-[11px] uppercase tracking-[0.08em] text-[#9AAAB3]">{label}</p><p className="mt-1 text-xs font-semibold text-[#13334F]">{value}</p></div>;
-}
-
-function BenefitRow({ text }: { text: string }) {
+function SignalRow({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]"><Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden /></div>
-      <p className="text-base leading-7 text-[#314858]">{text}</p>
+    <div className="grid gap-2 border-b border-[#DDE7E8] py-5 sm:grid-cols-[1fr_auto] sm:items-start">
+      <div><p className="font-semibold text-[#13334F]">{label}</p><p className="mt-1 text-sm leading-6 text-[#607583]">{detail}</p></div>
+      <span className="text-sm font-semibold text-[#257665]">{value}</span>
     </div>
   );
 }
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function DecisionRow({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="grid grid-cols-[120px_1fr] gap-5 py-4 text-sm sm:grid-cols-[150px_1fr]">
-      <span className="text-[#607583]">{label}</span><span className="font-semibold text-[#13334F]">{value}</span>
+    <div className="grid gap-2 border-b border-[#9FCFC3] py-5 sm:grid-cols-[0.7fr_0.8fr_1.2fr] sm:items-center">
+      <span className="text-sm text-[#607583]">{label}</span>
+      <span className="text-sm font-semibold text-[#13334F]">{value}</span>
+      <span className="text-sm text-[#466170]">{note}</span>
     </div>
   );
 }
 
-function ContinuityRow({ icon, title, body, last = false }: { icon: React.ReactNode; title: string; body: string; last?: boolean }) {
+function ContinuityRow({ title, body }: { title: string; body: string }) {
   return (
-    <div className={`grid gap-4 py-6 sm:grid-cols-[34px_1fr] ${last ? '' : 'border-b border-[#DDE7E8]'}`}>
-      <span className="text-[#2F8E7A]">{icon}</span>
-      <div><h3 className="text-lg font-semibold text-[#13334F]">{title}</h3><p className="mt-2 max-w-2xl text-sm leading-6 text-[#607583]">{body}</p></div>
+    <div className="grid gap-3 border-b border-[#DDE7E8] py-6 sm:grid-cols-[44px_1fr]">
+      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#E6F6F2] text-[#257665]"><Check className="h-4 w-4" strokeWidth={2.5} /></span>
+      <div><h3 className="text-lg font-semibold text-[#13334F]">{title}</h3><p className="mt-1 text-sm leading-6 text-[#607583]">{body}</p></div>
     </div>
   );
 }
