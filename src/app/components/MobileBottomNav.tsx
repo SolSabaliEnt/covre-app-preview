@@ -20,33 +20,34 @@ export function MobileBottomNav({ items, 'aria-label': ariaLabel, className }: M
   return (
     <nav
       className={cn(
-        'fixed inset-x-0 bottom-0 z-50 border-t border-[#DDE7E8] bg-white/96 px-2 pt-1.5 backdrop-blur',
+        'fixed left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 rounded-[1.65rem] border border-[#DDE7E8] bg-white/94 px-2 py-1.5 shadow-[0_12px_34px_rgba(16,40,61,0.16)] backdrop-blur-xl',
         className,
       )}
-      style={{ paddingBottom: 'max(0.6rem, env(safe-area-inset-bottom))' }}
+      style={{ bottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
       aria-label={ariaLabel}
     >
-      <div className="mx-auto flex max-w-3xl items-stretch justify-around">
+      <div className="flex items-center justify-around gap-1">
         {items.map(({ to, label, icon: Icon, active }) => (
           <Link
             key={`${label}-${to}`}
             to={to}
             onClick={() => resetRouteScrollNow()}
             aria-current={active ? 'page' : undefined}
+            aria-label={label}
+            title={label}
             className={cn(
-              'relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[11px] leading-tight transition-colors sm:text-xs',
-              active ? 'font-semibold text-[#13334F]' : 'font-medium text-[#7A8D98] hover:text-[#13334F]',
+              'relative flex h-12 min-w-12 flex-1 items-center justify-center rounded-[1.15rem] transition-all duration-150',
+              active
+                ? 'bg-[#E6F6F2] text-[#13334F]'
+                : 'text-[#7A8D98] hover:bg-[#F7FAFA] hover:text-[#13334F]',
             )}
           >
-            <span
-              className={cn(
-                'absolute inset-x-4 top-0 h-0.5 rounded-full transition-opacity',
-                active ? 'bg-[#53B59F] opacity-100' : 'opacity-0',
-              )}
+            <Icon
+              className={cn('h-6 w-6 shrink-0 transition-transform', active && 'scale-[1.04] text-[#2F8E7A]')}
               aria-hidden
+              strokeWidth={active ? 2.5 : 2}
             />
-            <Icon className={cn('h-5 w-5 shrink-0', active && 'text-[#2F8E7A]')} aria-hidden strokeWidth={active ? 2.3 : 2} />
-            <span className="truncate">{label}</span>
+            <span className="sr-only">{label}</span>
           </Link>
         ))}
       </div>
